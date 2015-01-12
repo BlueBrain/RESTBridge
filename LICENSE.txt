@@ -1,8 +1,8 @@
-Hello library
+RestConnector library
 
 Ecole Polytechnique Federale de Lausanne
 Brain Mind Institute,
 Blue Brain Project
-(c) 2006-2013. All rights reserved.
+(c) 2006-2015. All rights reserved.
 
-The hello library rules the world.
+The RestConnector library translate REST command for various rendering engines.

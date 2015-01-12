@@ -1,4 +1,4 @@
-# RESTConnector
+# RestConnector
 Exposes a REST interface for C++ applications
 
 ## using Buildyard:
@@ -7,5 +7,5 @@ Exposes a REST interface for C++ applications
   git clone https://github.com/Eyescale/Buildyard.git
   cd Buildyard
   git clone https://github.com/BlueBrain/config.git config.bluebrain
-  make VWSServer
+  make RestConnector
 ```
