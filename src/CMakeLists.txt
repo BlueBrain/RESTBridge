@@ -12,4 +12,5 @@ set(RESTCONNECTOR_SOURCES ${COMMON_SOURCES} main.cpp
                                             RestZeqTranslator.cpp)
 set(RESTCONNECTOR_LINK_LIBRARIES ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+add_executable(RestConnectorTest ${RESTCONNECTOR_HEADERS} ${RESTCONNECTOR_SOURCES})
 common_library(RestConnector)
