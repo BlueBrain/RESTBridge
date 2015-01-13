@@ -10,7 +10,8 @@ set(RESTCONNECTOR_HEADERS)
 set(RESTCONNECTOR_SOURCES ${COMMON_SOURCES} main.cpp
                                             RestParser.cpp
                                             RestZeqTranslator.cpp)
-set(RESTCONNECTOR_LINK_LIBRARIES ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-add_executable(RestConnectorTest ${RESTCONNECTOR_HEADERS} ${RESTCONNECTOR_SOURCES})
-common_library(RestConnector)
+set(RESTCONNECTOR_LINK_LIBRARIES ${Boost_LIBRARIES} ${LUNCHBOX_LIBRARIES} ${ZEQ_LIBRARIES} ${CPPNETLIB_LIBRARIES} pthread)
+
+common_application(RestConnector)
+
