@@ -4,10 +4,15 @@
 
 source_group(\\ FILES CMakeLists.txt)
 
-set(RESTCONNECTOR_PUBLIC_HEADERS ${COMMON_INCLUDES} RestParser.h
-                                                    RestZeqTranslator.h)
+set(RESTCONNECTOR_PUBLIC_HEADERS ${COMMON_INCLUDES} RequestHandler.h
+                                                    RestConnector.h
+                                                    RestParser.h
+                                                    RestZeqTranslator.h
+                                                    types.h)
 set(RESTCONNECTOR_HEADERS)
 set(RESTCONNECTOR_SOURCES ${COMMON_SOURCES} main.cpp
+                                            RestConnector.cpp
+                                            RequestHandler.cpp
                                             RestParser.cpp
                                             RestZeqTranslator.cpp)
 

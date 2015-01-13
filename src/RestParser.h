@@ -1,8 +1,8 @@
 /**
- * @file    WebEventInfo.h
+ * @file    RestParser.h
  * @brief
  * @author  Grigori Chevtchenko
- * @date    2014-29-07
+ * @date    2014-26-11
  * @remarks Copyright (c) BBP/EPFL 2005-2014; All rights reserved. Do not distribute without further notice.
  */
 
@@ -12,6 +12,8 @@
 #include <vector>
 #include <string>
 
+/*<< Defines the request handler.  It's a class that defines two
+     functions, `operator()` and `log()` >>*/
 class RestParser
 {
 public:
@@ -27,12 +29,7 @@ public:
 
 private:
 
-    bool findRestRequest_( const std::string& data );
-
-    bool parseRestRequest_();
-
-    //needed temp values
-    std::string restRequest_;
+    bool parseRestRequest_( const std::string& restRequest );
 
     //the result of parsing
     std::string command_;
