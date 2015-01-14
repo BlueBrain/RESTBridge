@@ -35,7 +35,7 @@ public:
 
     ~RestConnector();
 
-    void run();
+    void run( RestZeqTranslatorPtr restZeqTranslator );
 
 private:
 

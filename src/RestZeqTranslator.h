@@ -11,16 +11,16 @@
 
 #include <vector>
 #include <string>
+#include <zeq/event.h>
 
 class RestZeqTranslator
 {
 public:
-    RestZeqTranslator();
-
-private:
-
+    RestZeqTranslator(){}
+    virtual ~RestZeqTranslator(){}
+    virtual zeq::Event translate( const std::string& command, const std::vector< std::string >& params,
+                           const std::vector< std::string >& values) = 0;
 };
-
 
 #endif // _RestZeqTranslator_h_
 

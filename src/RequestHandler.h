@@ -15,7 +15,7 @@ class RequestHandler
 {
 public:
 
-    RequestHandler();
+    RequestHandler( RestZeqTranslatorPtr restZeqTranslator );
 
     ~RequestHandler();
 
@@ -34,7 +34,10 @@ private:
 
     boost::shared_ptr<boost::condition_variable> condition_;
     int counter_;
+    RestZeqTranslatorPtr restZeqTranslator_;
 
+    boost::shared_ptr< zeq::Subscriber > subscriber_;
+    boost::shared_ptr< zeq::Publisher > publisher_;
 };
 
 #endif // _RequestHandler_h_

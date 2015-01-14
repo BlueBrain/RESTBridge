@@ -9,10 +9,20 @@
 #include <src/RequestHandler.h>
 #include <src/RestParser.h>
 
-RequestHandler::RequestHandler()
+#include <zeq/event.h>
+#include <zeq/subscriber.h>
+#include <zeq/vocabulary.h>
+#include <zeq/publisher.h>
+
+#include <lunchbox/uri.h>
+
+RequestHandler::RequestHandler( RestZeqTranslatorPtr restZeqTranslator )
     : condition_( new boost::condition_variable ),
-      counter_(0)
-{}
+      counter_(0),
+      restZeqTranslator_( restZeqTranslator )
+{
+    publisher_.reset( new zeq::Publisher( lunchbox::URI( "camera://" ) ) );
+}
 
 RequestHandler::~RequestHandler(){}
 
@@ -25,21 +35,30 @@ void RequestHandler::operator() ( const server::request &request, server::respon
     boost::mutex::scoped_lock lock( io_mutex );
 
     std::cout << "method :" << request.method << std::endl;
-    //std::cout << "source :" << request.source << std::endl;
-    //std::cout << "source_port :" << request.source_port << std::endl;
-    //std::cout << "destination :" << request.destination << std::endl;
-    //std::cout << "http_version_major :" << (uint)request.http_version_major << std::endl;
-    //std::cout << "http_version_minor :" << (uint)request.http_version_minor << std::endl;
-    //std::cout << request.headers << std::endl;
-    //std::cout << "body :" << request.body << std::endl;
+
     RestParser parser;
-    parser.parse( request.destination );
+    if( parser.parse( request.destination ) )
+    {
+        // Translate REST event into Zeq event
+        zeq::Event zeqEvent = restZeqTranslator_->translate( parser.getCommand(), parser.getKeys(),
+                                                             parser.getValues() );
+
+        // Publish Zeq event
+        publisher_->publish( zeqEvent );
+
+        // Return response
+        std::ostringstream data;
+        data << "I am the mighty Server :) --> " << ip << ':' << port << "! Command: " << request.destination ;
+        response = server::response::stock_reply( server::response::ok, data.str() );
+    }
+    else
+    {
+        std::ostringstream data;
+        data << "Bad " << ip << ':' << port << "! Command: " << request.destination ;
+        response = server::response::stock_reply( server::response::bad_request, data.str() );
+    }
 
     //condition_->wait(lock);
-
-    std::ostringstream data;
-    data << "I am the mighty Server :) --> " << ip << ':' << port << "! Command: " << request.destination ;
-    response = server::response::stock_reply( server::response::ok, data.str() );
 }
 
 void RequestHandler::unlock()

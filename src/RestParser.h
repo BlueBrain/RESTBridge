@@ -23,7 +23,7 @@ public:
 
     std::string getCommand() { return command_; }
 
-    std::vector< std::string > getParams() { return params_; }
+    std::vector< std::string > getKeys() { return keys_; }
 
     std::vector< std::string > getValues() { return values_; }
 
@@ -33,7 +33,7 @@ private:
 
     //the result of parsing
     std::string command_;
-    std::vector< std::string > params_;
+    std::vector< std::string > keys_;
     std::vector< std::string > values_;
 };
 

@@ -13,8 +13,7 @@ set(RESTCONNECTOR_HEADERS)
 set(RESTCONNECTOR_SOURCES ${COMMON_SOURCES} main.cpp
                                             RestConnector.cpp
                                             RequestHandler.cpp
-                                            RestParser.cpp
-                                            RestZeqTranslator.cpp)
+                                            RestParser.cpp)
 
 set(RESTCONNECTOR_LINK_LIBRARIES ${Boost_LIBRARIES} ${LUNCHBOX_LIBRARIES} ${ZEQ_LIBRARIES} ${CPPNETLIB_LIBRARIES} pthread)
 

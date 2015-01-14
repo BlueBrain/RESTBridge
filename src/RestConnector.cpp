@@ -17,9 +17,9 @@ RestConnector::RestConnector( const float timeOut, const std::string& address,
 
 RestConnector::~RestConnector(){}
 
-void RestConnector::RestConnector::run()
+void RestConnector::RestConnector::run( RestZeqTranslatorPtr restZeqTranslator )
 {
-    RequestHandler handler;
+    RequestHandler handler( restZeqTranslator );
 
     server::options options( handler );
     server server_( options.address( address_ ).port( port_ ) );

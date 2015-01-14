@@ -41,43 +41,55 @@ bool RestParser::parseRestRequest_( const std::string& restRequest )
     std::vector<std::string> commandAndParam;
     boost::split( commandAndParam, restRequest, boost::is_any_of( "?" ) );
 
+    std::cout<<"Size of C&P: "<< commandAndParam.size() << " C1: " << commandAndParam[0] << " C2: " << commandAndParam[1] <<std::endl;
+
     if( commandAndParam[0] == "" )
     {
         std::cout << "Error: No command found" << std::endl;
         return false;
     }
-    else if( commandAndParam[1] == "" )
+    else if( commandAndParam.size() > 1u )
     {
+        // Command
         command_ = commandAndParam[0];
-        return true;
-    }
-
-    command_ = commandAndParam[0];
-
-    std::vector<std::string> params;
-    boost::split( params, commandAndParam[1], boost::is_any_of( "&" ) );
-
-    if( params.empty() )
-        return true;
-
-    for( uint32_t i=0; i < params.size(); i++ )
-    {
-        std::cout << "Param:" << params[i] << std::endl;
-        if( params[i] != "" )
+        if( commandAndParam[1] != "" )
         {
-            std::vector<std::string> paramsAndValues;
-            boost::split( paramsAndValues, params[i], boost::is_any_of( "=" ) );
+            // Parameters
+            std::vector<std::string> params;
+            boost::split( params, commandAndParam[1], boost::is_any_of( "&" ) );
 
-            if( ( paramsAndValues[0] == "" ) || ( paramsAndValues[1] == "") || (paramsAndValues.size() != 2 ) )
+            if( params.empty() )
+                return true;
+
+            for( uint32_t i=0; i < params.size(); i++ )
             {
-                std::cout << "Error: Parameter number " << i + 1u << " is unconstistant." << std::endl;
-                return false;
-            }
+                std::cout << "Param:" << params[i] << std::endl;
+                if( params[i] != "" )
+                {
+                    std::vector<std::string> paramsAndValues;
+                    boost::split( paramsAndValues, params[i], boost::is_any_of( "=" ) );
+                    std::cout<<"P&V size: "<< paramsAndValues.size() <<std::endl;
+                    if( paramsAndValues.size() > 1u )
+                    {
+                        if( ( paramsAndValues[0] == "" ) || ( paramsAndValues[1] == "") || (paramsAndValues.size() != 2 ) )
+                        {
+                            std::cout << "Error: Parameter number " << i + 1u << " is unconstistant." << std::endl;
+                            return false;
+                        }
 
-            params_.push_back( paramsAndValues[0] );
-            values_.push_back( paramsAndValues[1] );
+                        keys_.push_back( paramsAndValues[0] );
+                        values_.push_back( paramsAndValues[1] );
+                    }
+                    else
+                    {
+                        std::cout << "Error: Parameter number " << i + 1u << " is unconstistant." << std::endl;
+                        return false;
+                    }
+                }
+            }
         }
     }
-    std::cout << "Parsing ok. Number of parameters: " << params_.size( )<< std::endl;
+
+    std::cout << "Parsing ok. Number of parameters: " << keys_.size( )<< std::endl;
     return true;
 }

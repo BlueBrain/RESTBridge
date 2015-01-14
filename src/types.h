@@ -15,15 +15,24 @@
 #include <boost/thread/thread.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <zeq/event.h>
-#include <zeq/subscriber.h>
-#include <zeq/vocabulary.h>
-#include <zeq/publisher.h>
+#include <src/RestZeqTranslator.h>
 
 //classes
 class RequestHandler;
+namespace zeq
+{
+    class Publisher;
+    class Subscriber;
+    class Event;
+}
 
 //typedefs
 typedef boost::network::http::server<RequestHandler> server;
+
+/**
+ * SmartPtr definitions
+ */
+
+typedef boost::shared_ptr< RestZeqTranslator > RestZeqTranslatorPtr;
 
 #endif // _types_h_

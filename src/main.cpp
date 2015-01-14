@@ -9,6 +9,29 @@
 #include <src/types.h>
 #include <src/RestConnector.h>
 
+#include <zeq/event.h>
+#include <zeq/subscriber.h>
+#include <zeq/publisher.h>
+#include <zeq/hbp/vocabulary.h>
+
+using lunchbox::make_uint128;
+class testRestZeqTranslator: public RestZeqTranslator
+{
+public:
+    virtual zeq::Event translate( const std::string&, const std::vector< std::string >&,
+                           const std::vector< std::string >&)
+    {
+        std::vector<float> matrix;
+        matrix.push_back( 1 ); matrix.push_back( 0 ); matrix.push_back( 0 ); matrix.push_back( 0 );
+        matrix.push_back( 0 ); matrix.push_back( 1 ); matrix.push_back( 0 ); matrix.push_back( 0 );
+        matrix.push_back( 0 ); matrix.push_back( 0 ); matrix.push_back( 1 ); matrix.push_back( 0 );
+        matrix.push_back( 0 ); matrix.push_back( 0 ); matrix.push_back( 0 ); matrix.push_back( 1 );
+
+        zeq::Event event = zeq::hbp::serializeCamera( matrix );
+        return event;
+    }
+};
+
 int main( int argc, char * argv[] )
 {
     if ( argc != 4 ) {
@@ -18,8 +41,9 @@ int main( int argc, char * argv[] )
     try
     {
         float timeOut = boost::lexical_cast<float>( argv[3] );
+        RestZeqTranslatorPtr kakaToDo( new testRestZeqTranslator() );
         RestConnector mainServer( timeOut, argv[1] , argv[2] );
-        mainServer.run();
+        mainServer.run( kakaToDo );
     }
     catch ( std::exception &e )
     {
