@@ -1,0 +1,15 @@
+// Copyright (c) 2014, Human Brain Project
+//                     Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+//                     Cyrille Favreau <cyrille.favreau@epfl.ch>
+
+namespace restconnector.zeq;
+
+table GenericResponse
+{
+  id:ulong;
+  status:ulong;
+  type:ulong;
+  data:[ubyte];
+}
+
+root_type GenericResponse;

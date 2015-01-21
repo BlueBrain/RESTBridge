@@ -9,7 +9,10 @@
 #ifndef _RequestHandler_h_
 #define _RequestHandler_h_
 
-#include <src/types.h>
+#include <restconnector/types.h>
+
+namespace restconnector
+{
 
 class RequestHandler
 {
@@ -32,12 +35,19 @@ public:
 
 private:
 
+    void onGenericResponse_( const ::zeq::Event& );
+
     boost::shared_ptr<boost::condition_variable> condition_;
     int counter_;
     RestZeqTranslatorPtr restZeqTranslator_;
 
-    boost::shared_ptr< zeq::Subscriber > subscriber_;
-    boost::shared_ptr< zeq::Publisher > publisher_;
+    boost::shared_ptr< ::zeq::Subscriber > subscriber_;
+    boost::shared_ptr< ::zeq::Publisher > publisher_;
+
+    bool blocked_;
+    server::request request_;
+    server::response response_;
 };
 
+}
 #endif // _RequestHandler_h_

@@ -12,6 +12,9 @@
 #include <vector>
 #include <string>
 
+namespace restconnector
+{
+
 /*<< Defines the request handler.  It's a class that defines two
      functions, `operator()` and `log()` >>*/
 class RestParser
@@ -36,6 +39,8 @@ private:
     std::vector< std::string > keys_;
     std::vector< std::string > values_;
 };
+
+}
 
 
 #endif // _RestParser_h_

@@ -6,10 +6,13 @@
  * @remarks Copyright (c) BBP/EPFL 2005-2014; All rights reserved. Do not distribute without further notice.
  */
 
-#include <src/RestParser.h>
+#include <restconnector/RestParser.h>
 
 #include <iostream>
 #include <boost/algorithm/string.hpp>
+
+namespace restconnector
+{
 
 RestParser::RestParser()
 {}
@@ -92,4 +95,6 @@ bool RestParser::parseRestRequest_( const std::string& restRequest )
 
     std::cout << "Parsing ok. Number of parameters: " << keys_.size( )<< std::endl;
     return true;
+}
+
 }
