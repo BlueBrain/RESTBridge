@@ -1,9 +1,5 @@
-/**
- * @file    RestConnector.h
- * @brief
- * @author  Grigori Chevtchenko
- * @date    2015-01-13
- * @remarks Copyright (c) BBP/EPFL 2005-2014; All rights reserved. Do not distribute without further notice.
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
 #ifndef _RestConnector_h_
@@ -23,11 +19,11 @@ public:
 
     ~RestConnector();
 
-    void run( RestZeqTranslatorPtr restZeqTranslator );
+    void run();
 
 private:
 
-    void run_( RestZeqTranslatorPtr restZeqTranslator );
+    void run_();
     std::string address_;
     std::string port_;
 };

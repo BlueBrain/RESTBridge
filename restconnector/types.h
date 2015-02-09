@@ -32,12 +32,6 @@ class RestZeqTranslator;
 //typedefs
 typedef boost::network::http::server<RequestHandler> server;
 
-/**
- * SmartPtr definitions
- */
-
-typedef boost::shared_ptr< RestZeqTranslator > RestZeqTranslatorPtr;
-
 }
 
 #endif // _types_h_

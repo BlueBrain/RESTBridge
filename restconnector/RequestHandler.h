@@ -1,15 +1,13 @@
-/**
- * @file    RequestHandler.h
- * @brief
- * @author  Grigori Chevtchenko
- * @date    2014-26-11
- * @remarks Copyright (c) BBP/EPFL 2005-2014; All rights reserved. Do not distribute without further notice.
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
 #ifndef _RequestHandler_h_
 #define _RequestHandler_h_
 
 #include <restconnector/types.h>
+#include <restconnector/RestZeqTranslator.h>
 
 namespace restconnector
 {
@@ -18,7 +16,7 @@ class RequestHandler
 {
 public:
 
-    RequestHandler( RestZeqTranslatorPtr restZeqTranslator );
+    RequestHandler();
 
     ~RequestHandler();
 
@@ -35,11 +33,14 @@ public:
 
 private:
 
-    void onGenericResponse_( const ::zeq::Event& );
+    void onImageRawRGBA8Event_( const ::zeq::Event& event );
+
+    void processPUT_( const ::zeq::Event& event );
+    void processGET_( const ::zeq::Event& event );
+    void processPOST_( const ::zeq::Event& event );
 
     boost::shared_ptr<boost::condition_variable> condition_;
     int counter_;
-    RestZeqTranslatorPtr restZeqTranslator_;
 
     boost::shared_ptr< ::zeq::Subscriber > subscriber_;
     boost::shared_ptr< ::zeq::Publisher > publisher_;

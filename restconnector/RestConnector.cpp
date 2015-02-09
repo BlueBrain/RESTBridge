@@ -1,9 +1,5 @@
-/**
- * @file    RestConnector.cpp
- * @brief
- * @author  Grigori Chevtchenko
- * @date    2015-01-13
- * @remarks Copyright (c) BBP/EPFL 2005-2014; All rights reserved. Do not distribute without further notice.
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
 #include <restconnector/RestConnector.h>
@@ -18,15 +14,15 @@ RestConnector::RestConnector( const std::string& address, const std::string& por
 
 RestConnector::~RestConnector(){}
 
-void RestConnector::RestConnector::run( RestZeqTranslatorPtr restZeqTranslator )
+void RestConnector::RestConnector::run()
 {
-    boost::thread main( boost::bind( &RestConnector::run_, this, restZeqTranslator ) );
-    //main.join()
+    boost::thread main( boost::bind( &RestConnector::run_, this ) );
+    main.join();
 }
 
-void RestConnector::RestConnector::run_( RestZeqTranslatorPtr restZeqTranslator )
+void RestConnector::RestConnector::run_()
 {
-    RequestHandler handler( restZeqTranslator );
+    RequestHandler handler;
 
     server::options options( handler );
     server server_( options.address( address_ ).port( port_ ) );

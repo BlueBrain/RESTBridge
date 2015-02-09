@@ -1,9 +1,5 @@
-/**
- * @file    RestZeqTranslator.h
- * @brief
- * @author  Grigori Chevtchenko
- * @date    2014-27-11
- * @remarks Copyright (c) BBP/EPFL 2005-2014; All rights reserved. Do not distribute without further notice.
+/* Copyright (c) 2014-2015, Human Brain Project
+ *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
 #ifndef _RestZeqTranslator_h_
@@ -19,10 +15,14 @@ namespace restconnector
 class RestZeqTranslator
 {
 public:
-    RestZeqTranslator(){}
-    virtual ~RestZeqTranslator(){}
-    virtual ::zeq::Event translate( const std::string& command, const std::vector< std::string >& params,
-                           const std::vector< std::string >& values) = 0;
+    RestZeqTranslator();
+    ~RestZeqTranslator();
+    ::zeq::Event translate();
+    bool findCommand( const std::string& data );
+
+private:
+    bool checkCommandValidity_( const std::string& command );
+    std::string command_;
 };
 
 }
