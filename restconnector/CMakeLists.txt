@@ -17,4 +17,4 @@ set(RESTCONNECTOR_SOURCES ${COMMON_SOURCES} main.cpp
 set(RESTCONNECTOR_LINK_LIBRARIES ${Boost_LIBRARIES} ${LUNCHBOX_LIBRARIES} ${ZEQ_LIBRARIES} ${CPPNETLIB_LIBRARIES} pthread)
 
 #common_library(RestConnector)
-common_application(RestConnector)
+common_application(RESTConnector)
