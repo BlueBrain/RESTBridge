@@ -95,7 +95,6 @@ void RequestHandler::onImageRawRGBA8Event_( const ::zeq::Event& event )
 {
     ::zeq::hbp::data::ImageRawRGBA8 image( ::zeq::hbp::deserializeImageRawRGBA8( event ) );
 
-    std::ostringstream data;
     response_ = server::response::stock_reply( server::response::ok,
                                                ::zeq::vocabulary::deserializeJSON( event) );
     blocked_ = false;
