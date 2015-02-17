@@ -27,8 +27,8 @@ RequestHandler::RequestHandler()
     , counter_(0)
     , blocked_( false )
 {
-    publisher_.reset( new ::zeq::Publisher( lunchbox::URI( "restCommand10026://" ) ) );
-    subscriber_.reset( new ::zeq::Subscriber( lunchbox::URI( "restResponse10026://" ) ) );
+    publisher_.reset( new ::zeq::Publisher( lunchbox::URI( "restCommand10025://" ) ) );
+    subscriber_.reset( new ::zeq::Subscriber( lunchbox::URI( "restResponse10025://" ) ) );
     subscriber_->registerHandler( ::zeq::hbp::EVENT_IMAGERAWRGBA8,
                                   boost::bind( &RequestHandler::onImageRawRGBA8Event_, this, _1 ));
 }
