@@ -11,21 +11,36 @@
 namespace restconnector
 {
 
+/**
+ * The RestConnector class is responsible starting a HTTP server
+ * in a dedicated thread, according to a given hostname and port.
+ * HTTP requests are forwarded to an implicitely registered handler.
+ */
 class RestConnector
 {
 public:
 
-    RestConnector( const std::string& address, const std::string& port );
+    /**
+     * Default constructor.
+     * @param hostname Hostname or IP address
+     * @param port Listening port
+     */
+    RestConnector( const std::string& hostname, const uint16_t port );
 
     ~RestConnector();
 
-    void run();
+    /**
+     * Listening to HTTP requests and forwarding them to the handler in
+     * a dedicated thread.
+     * @param schema Schema prefix used by zeq publisher and subscriber
+     */
+    void run( const std::string& schema ) const;
 
 private:
 
-    void run_();
-    std::string address_;
-    std::string port_;
+    void run_( const std::string& schema ) const;
+    std::string hostname_;
+    uint16_t port_;
 };
 
 }

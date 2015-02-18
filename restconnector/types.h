@@ -10,17 +10,8 @@
 #define _types_h_
 
 #include <boost/network/protocol/http/server.hpp>
-#include <iostream>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/algorithm/string.hpp>
-
-namespace zeq
-{
-    class Publisher;
-    class Subscriber;
-    class Event;
-}
+#include <zeq/types.h>
+#undef ECHO // On RedHat, ECHO is already defined and conflicts with the ECHO ZEq event
 
 namespace restconnector
 {

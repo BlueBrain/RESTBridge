@@ -53,7 +53,7 @@ macro(COMMON_PACKAGE Name)
 endmacro()
 
 common_package(Boost 1.41.0  REQUIRED COMPONENTS unit_test_framework program_options system thread)
-common_package(cppnetlib 0.11.1  REQUIRED )
+common_package(cppnetlib 0.11  REQUIRED )
 common_package(Lunchbox 1.10  REQUIRED )
 common_package(zeq   REQUIRED )
 common_package(FlatBuffers   REQUIRED )

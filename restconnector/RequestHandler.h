@@ -12,38 +12,50 @@
 namespace restconnector
 {
 
+/**
+ * The RequestHandler class handles incoming HTTP requests and
+ * transforms them into corresponding zeq events based on registered
+ * vocabularies.
+ */
 class RequestHandler
 {
 public:
 
-    RequestHandler();
+    /**
+     * Constructor
+     * @param publisherSchema Schema on which zeq events will be published
+     * @param subscriberSchema Schema on which zeq events will be received
+     */
+    RequestHandler( const std::string& publisherSchema,
+                    const std::string& subscriberSchema );
 
     ~RequestHandler();
 
-    /*<< This is the function that handles the incoming request. >>*/
+    /**
+     * This operator in invoked whenever an HTTP request is accepted by the server.
+     * It is responsible for processing the request and generating the response.
+     * @param request Incoming HTTP request
+     * @param response Response to be sent back
+     */
     void operator() ( const server::request &request, server::response &response );
 
-    void unlock();
-
-    /*<< It's necessary to define a log function, but it's ignored in
-         this example. >>*/
-    void log(...) {
-        // do nothing
-    }
+    /**
+     * Callback method used for logging internal errors raised by the underlying
+     * cppnetlib library.
+     * @param info String containing the error message
+     */
+    void log( server::string_type const &info );
 
 private:
 
-    void onImageRawRGBA8Event_( const ::zeq::Event& event );
+    void onImageJPEGEvent_( const ::zeq::Event& event );
 
     void processPUT_( const ::zeq::Event& event );
     void processGET_( const ::zeq::Event& event );
     void processPOST_( const ::zeq::Event& event );
 
-    boost::shared_ptr<boost::condition_variable> condition_;
-    int counter_;
-
-    boost::shared_ptr< ::zeq::Subscriber > subscriber_;
-    boost::shared_ptr< ::zeq::Publisher > publisher_;
+    boost::scoped_ptr< ::zeq::Subscriber > subscriber_;
+    boost::scoped_ptr< ::zeq::Publisher > publisher_;
 
     bool blocked_;
     server::request request_;

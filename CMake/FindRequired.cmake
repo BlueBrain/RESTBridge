@@ -55,7 +55,7 @@ common_package(Boost 1.41.0 COMPONENTS unit_test_framework program_options syste
 if(NOT Boost_FOUND AND NOT BOOST_FOUND)
   set(FIND_REQUIRED_FAILED "${FIND_REQUIRED_FAILED} Boost")
 endif()
-common_package(cppnetlib 0.11.1  QUIET)
+common_package(cppnetlib 0.11  QUIET)
 if(NOT cppnetlib_FOUND AND NOT CPPNETLIB_FOUND)
   set(FIND_REQUIRED_FAILED "${FIND_REQUIRED_FAILED} cppnetlib")
 endif()
