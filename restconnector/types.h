@@ -10,7 +10,6 @@
 #define _types_h_
 
 #include <boost/network/protocol/http/server.hpp>
-#include <iostream>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/algorithm/string.hpp>
