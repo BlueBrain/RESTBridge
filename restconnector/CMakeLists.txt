@@ -9,12 +9,10 @@ set(RESTCONNECTOR_PUBLIC_HEADERS ${COMMON_INCLUDES} RequestHandler.h
                                                     RestZeqTranslator.h
                                                     types.h)
 set(RESTCONNECTOR_HEADERS)
-set(RESTCONNECTOR_SOURCES ${COMMON_SOURCES} main.cpp
-                                            RestConnector.cpp
+set(RESTCONNECTOR_SOURCES ${COMMON_SOURCES} RestConnector.cpp
                                             RequestHandler.cpp
                                             RestZeqTranslator.cpp)
 
 set(RESTCONNECTOR_LINK_LIBRARIES ${Boost_LIBRARIES} ${LUNCHBOX_LIBRARIES} ${ZEQ_LIBRARIES} ${CPPNETLIB_LIBRARIES} pthread)
 
-#common_library(RestConnector)
-common_application(RESTConnector)
+common_library(RESTConnector)
