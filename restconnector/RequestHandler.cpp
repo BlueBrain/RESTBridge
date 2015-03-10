@@ -23,19 +23,30 @@ RequestHandler::RequestHandler( const std::string& publisherSchema,
                                 const std::string& subscriberSchema )
     : subscriber_( new ::zeq::Subscriber( lunchbox::URI( subscriberSchema ) ) )
     , publisher_( new ::zeq::Publisher( lunchbox::URI( publisherSchema ) ) )
-    , blocked_( false )
+    , listening_( true )
+    , listeningThread_( new boost::thread( boost::bind( &RequestHandler::listen_, this ) ) )
 {
     subscriber_->registerHandler( ::zeq::hbp::EVENT_IMAGEJPEG,
                                   boost::bind( &RequestHandler::onImageJPEGEvent_, this, _1 ));
+    subscriber_->registerHandler( ::zeq::hbp::EVENT_HEARTBEAT,
+                                  boost::bind( &RequestHandler::onHeartbeatEvent_, this ));
+    requestLock_.lock();
 }
 
 RequestHandler::~RequestHandler()
 {
+    listening_ = false;
+    listeningThread_->join();
+}
+
+void RequestHandler::listen_()
+{
+    while( listening_ )
+        while( subscriber_->receive( 200 ) ){}
 }
 
 void RequestHandler::operator() ( const server::request &request, server::response &response )
 {
-    request_ = request;
     server::string_type ip = source( request );
     RestZeqTranslator restZeqTranslator;
 
@@ -72,26 +83,22 @@ void RequestHandler::processPUT_( const ::zeq::Event& event )
 {
     publisher_->publish( event );
     std::ostringstream data;
-    data << "Detected a PUT." <<std::endl;
     response_ = server::response::stock_reply( server::response::ok, data.str() );
 }
 
 void RequestHandler::processGET_( const ::zeq::Event& event )
 {
-    blocked_ = true;
     publisher_->publish( event );
 
-    while( blocked_ )
-    {
-        while( subscriber_->receive( 0 ) ){}
-    }
+    //We lock here because we need to wait for the response before new requests are processed.
+    //This is unlocked when the response for the published event is received.
+    requestLock_.lock();
 }
 
 void RequestHandler::processPOST_( const ::zeq::Event& event )
 {
     publisher_->publish( event  );
     std::ostringstream data;
-    data << "Detected a POST." <<std::endl;
     response_ = server::response::stock_reply( server::response::ok, data.str() );
 }
 
@@ -101,7 +108,12 @@ void RequestHandler::onImageJPEGEvent_( const ::zeq::Event& event )
 
     response_ = server::response::stock_reply( server::response::ok,
                                                ::zeq::vocabulary::deserializeJSON( event) );
-    blocked_ = false;
+    requestLock_.unlock();
+}
+
+void RequestHandler::onHeartbeatEvent_()
+{
+    LBINFO << "Heartbeat event received." << std::endl;
 }
 
 void RequestHandler::log( server::string_type const &info )

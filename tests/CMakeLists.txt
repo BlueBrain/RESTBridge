@@ -1,0 +1,6 @@
+# Copyright (c) HBP 2015 Grigori.Chevtchenko@epfl.ch
+# Change this number when adding tests to force a CMake run: 3
+
+set(TEST_LIBRARIES RESTConnector)
+
+include(CommonCTest)

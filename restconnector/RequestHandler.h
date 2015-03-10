@@ -49,15 +49,21 @@ public:
 private:
 
     void onImageJPEGEvent_( const ::zeq::Event& event );
+    void onHeartbeatEvent_();
 
     void processPUT_( const ::zeq::Event& event );
     void processGET_( const ::zeq::Event& event );
     void processPOST_( const ::zeq::Event& event );
+    void listen_();
 
     boost::scoped_ptr< ::zeq::Subscriber > subscriber_;
     boost::scoped_ptr< ::zeq::Publisher > publisher_;
 
-    bool blocked_;
+    boost::mutex requestLock_;
+
+    bool listening_;
+    boost::scoped_ptr< boost::thread > listeningThread_;
+
     server::request request_;
     server::response response_;
 };
