@@ -26,10 +26,11 @@ RequestHandler::RequestHandler( const std::string& publisherSchema,
     , listening_( true )
     , listeningThread_( new boost::thread( boost::bind( &RequestHandler::listen_, this ) ) )
 {
-    subscriber_->registerHandler( ::zeq::hbp::EVENT_IMAGEJPEG,
-                                  boost::bind( &RequestHandler::onImageJPEGEvent_, this, _1 ));
+    addEventDescriptor_( ::zeq::hbp::IMAGEJPEG,
+                 ZeqEventDescriptor( ::zeq::hbp::EVENT_IMAGEJPEG, ::zeq::hbp::SCHEMA_IMAGEJPEG ) );
+
     subscriber_->registerHandler( ::zeq::hbp::EVENT_HEARTBEAT,
-                                  boost::bind( &RequestHandler::onHeartbeatEvent_, this ));
+                                  boost::bind( &RequestHandler::onFirstHeartbeatEvent_, this ));
     requestLock_.lock();
 }
 
@@ -37,6 +38,14 @@ RequestHandler::~RequestHandler()
 {
     listening_ = false;
     listeningThread_->join();
+}
+
+void RequestHandler::addEventDescriptor_( const std::string& restName,
+                                          const ZeqEventDescriptor& descriptor )
+{
+    vocabulary_[ restName ] = descriptor;
+    subscriber_->registerHandler( descriptor.first,
+                                  boost::bind( &RequestHandler::onKnownEvent_, this, _1 ));
 }
 
 void RequestHandler::listen_()
@@ -102,18 +111,26 @@ void RequestHandler::processPOST_( const ::zeq::Event& event )
     response_ = server::response::stock_reply( server::response::ok, data.str() );
 }
 
-void RequestHandler::onImageJPEGEvent_( const ::zeq::Event& event )
+void RequestHandler::onKnownEvent_( const ::zeq::Event& event )
 {
-    ::zeq::hbp::data::ImageJPEG image( ::zeq::hbp::deserializeImageJPEG( event ) );
-
     response_ = server::response::stock_reply( server::response::ok,
                                                ::zeq::vocabulary::deserializeJSON( event) );
     requestLock_.unlock();
 }
 
+void RequestHandler::onFirstHeartbeatEvent_()
+{
+    LBVERB << "Asked For Vocabulary." << std::endl;
+    const ::zeq::Event& zeqEvent =
+            ::zeq::hbp::serializeRequest( ::zeq::vocabulary::EVENT_VOCABULARY );
+    publisher_->publish( zeqEvent );
+    subscriber_->deregisterHandler( ::zeq::hbp::EVENT_HEARTBEAT );
+    subscriber_->registerHandler( ::zeq::hbp::EVENT_HEARTBEAT,
+                                  boost::bind( &RequestHandler::onHeartbeatEvent_, this ));
+}
 void RequestHandler::onHeartbeatEvent_()
 {
-    LBINFO << "Heartbeat event received." << std::endl;
+    LBVERB << "Heartbeat event received." << std::endl;
 }
 
 void RequestHandler::log( server::string_type const &info )
