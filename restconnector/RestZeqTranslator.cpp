@@ -29,9 +29,9 @@ RestZeqTranslator::~RestZeqTranslator()
         // The vacabulary is responsible for returning the
         // zeq event
         return ::zeq::vocabulary::serializeJSON( ::zeq::hbp::EVENT_CAMERA, body );
-    else if( command_ == "request" )
+    if( command_ == "request" )
         //  This must be in the vocabulary
-        return ::zeq::hbp::serializeRequest( ::zeq::hbp::EVENT_IMAGEJPEG );
+        return ::zeq::vocabulary::serializeRequest( ::zeq::hbp::EVENT_IMAGEJPEG );
     return ::zeq::vocabulary::serializeEcho("Unknown REST command");
 }
 
@@ -44,9 +44,8 @@ bool RestZeqTranslator::isCommandSupported( const std::string& request )
         LBINFO << "Error: The request string is empty." << std::endl;
         return false;
     }
-    else
-        boost::split( dataParts, request, boost::is_any_of( "/" ) );
 
+    boost::split( dataParts, request, boost::is_any_of( "/" ) );
     std::vector<std::string> commandAndPayload;
     boost::split( commandAndPayload, dataParts.back(), boost::is_any_of( "?" ) );
 

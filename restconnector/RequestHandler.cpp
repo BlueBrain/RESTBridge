@@ -29,7 +29,7 @@ RequestHandler::RequestHandler( const std::string& publisherSchema,
     addEventDescriptor_( ::zeq::hbp::IMAGEJPEG,
                  ZeqEventDescriptor( ::zeq::hbp::EVENT_IMAGEJPEG, ::zeq::hbp::SCHEMA_IMAGEJPEG ) );
 
-    subscriber_->registerHandler( ::zeq::hbp::EVENT_HEARTBEAT,
+    subscriber_->registerHandler( ::zeq::vocabulary::EVENT_HEARTBEAT,
                                   boost::bind( &RequestHandler::onFirstHeartbeatEvent_, this ));
     requestLock_.lock();
 }
@@ -122,10 +122,10 @@ void RequestHandler::onFirstHeartbeatEvent_()
 {
     LBVERB << "Asked For Vocabulary." << std::endl;
     const ::zeq::Event& zeqEvent =
-            ::zeq::hbp::serializeRequest( ::zeq::vocabulary::EVENT_VOCABULARY );
+            ::zeq::vocabulary::serializeRequest( ::zeq::vocabulary::EVENT_VOCABULARY );
     publisher_->publish( zeqEvent );
-    subscriber_->deregisterHandler( ::zeq::hbp::EVENT_HEARTBEAT );
-    subscriber_->registerHandler( ::zeq::hbp::EVENT_HEARTBEAT,
+    subscriber_->deregisterHandler( ::zeq::vocabulary::EVENT_HEARTBEAT );
+    subscriber_->registerHandler( ::zeq::vocabulary::EVENT_HEARTBEAT,
                                   boost::bind( &RequestHandler::onHeartbeatEvent_, this ));
 }
 void RequestHandler::onHeartbeatEvent_()
