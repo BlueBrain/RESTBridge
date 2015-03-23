@@ -16,7 +16,7 @@ RestConnector::RestConnector( const std::string& hostname, const uint16_t port )
     : hostname_( hostname )
     , port_( port )
 {
-    LBASSERT( hostname != "");
+    LBASSERT( !hostname.empty() );
 }
 
 RestConnector::~RestConnector(){}

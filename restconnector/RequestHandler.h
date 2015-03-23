@@ -48,8 +48,12 @@ public:
 
 private:
 
-    void onImageJPEGEvent_( const ::zeq::Event& event );
+    typedef std::pair< lunchbox::uint128_t, std::string > ZeqEventDescriptor;
+
+    void onFirstHeartbeatEvent_();
     void onHeartbeatEvent_();
+    void onKnownEvent_( const ::zeq::Event& event );
+    void addEventDescriptor_( const std::string& restName, const ZeqEventDescriptor& descriptor );
 
     void processPUT_( const ::zeq::Event& event );
     void processGET_( const ::zeq::Event& event );
@@ -66,6 +70,8 @@ private:
 
     server::request request_;
     server::response response_;
+
+    std::map< std::string, ZeqEventDescriptor > vocabulary_;
 };
 
 }
