@@ -44,7 +44,8 @@ BOOST_AUTO_TEST_CASE( test_requestEvent )
 
     ::zeq::Event zeqEvent = restzeqTranslator.translate( "" );
 
-    BOOST_CHECK_EQUAL( ::zeq::hbp::EVENT_IMAGEJPEG, ::zeq::hbp::deserializeRequest( zeqEvent ) );
+    BOOST_CHECK_EQUAL( ::zeq::hbp::EVENT_IMAGEJPEG,
+                       ::zeq::vocabulary::deserializeRequest( zeqEvent ) );
 }
 
 BOOST_AUTO_TEST_CASE( test_unknownEvent )
