@@ -28,11 +28,11 @@ RestZeqTranslator::~RestZeqTranslator()
         // This must be in the vocabulary
         // The vacabulary is responsible for returning the
         // zeq event
-        return ::zeq::vocabulary::serializeJSON( ::zeq::hbp::EVENT_CAMERA, body );
+        return zeq::vocabulary::serializeJSON( zeq::hbp::EVENT_CAMERA, body );
     if( command_ == "request" )
         //  This must be in the vocabulary
-        return ::zeq::vocabulary::serializeRequest( ::zeq::hbp::EVENT_IMAGEJPEG );
-    return ::zeq::vocabulary::serializeEcho("Unknown REST command");
+        return zeq::vocabulary::serializeRequest( zeq::hbp::EVENT_IMAGEJPEG );
+    return zeq::vocabulary::serializeEcho("Unknown REST command");
 }
 
 bool RestZeqTranslator::isCommandSupported( const std::string& request )

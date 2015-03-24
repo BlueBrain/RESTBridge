@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE( test_cameraEvent )
 
     ::zeq::Event zeqEvent = restzeqTranslator.translate( bodyJSON );
 
-    const std::vector< float >& deserialized = ::zeq::hbp::deserializeCamera( zeqEvent );
+    const std::vector< float >& deserialized = zeq::hbp::deserializeCamera( zeqEvent );
 
     BOOST_CHECK_EQUAL_COLLECTIONS( matrixData.begin(), matrixData.end(),
                                    deserialized.begin(), deserialized.end( ));
@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE( test_requestEvent )
 
     ::zeq::Event zeqEvent = restzeqTranslator.translate( "" );
 
-    BOOST_CHECK_EQUAL( ::zeq::hbp::EVENT_IMAGEJPEG,
-                       ::zeq::vocabulary::deserializeRequest( zeqEvent ) );
+    BOOST_CHECK_EQUAL( zeq::hbp::EVENT_IMAGEJPEG,
+                       zeq::vocabulary::deserializeRequest( zeqEvent ) );
 }
 
 BOOST_AUTO_TEST_CASE( test_unknownEvent )
