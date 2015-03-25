@@ -2,7 +2,7 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#include <restconnector/RestZeqTranslator.h>
+#include "RestZeqTranslator.h"
 #include <zeq/hbp/vocabulary.h>
 
 #include <boost/algorithm/string.hpp>
@@ -11,6 +11,8 @@
 #include <iostream>
 
 namespace restconnector
+{
+namespace detail
 {
 
 RestZeqTranslator::RestZeqTranslator()
@@ -71,4 +73,5 @@ bool RestZeqTranslator::checkCommandValidity_( const std::string& command ) cons
     return false;
 }
 
+}
 }

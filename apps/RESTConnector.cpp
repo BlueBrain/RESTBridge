@@ -2,18 +2,8 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#include <restconnector/types.h>
 #include <restconnector/RestConnector.h>
-#include <restconnector/RestZeqTranslator.h>
-
-#include <zeq/event.h>
-#include <zeq/subscriber.h>
-#include <zeq/publisher.h>
-#include <zeq/hbp/vocabulary.h>
-
-#include <lunchbox/uri.h>
 #include <lunchbox/log.h>
-
 #include <boost/program_options.hpp>
 
 using namespace restconnector;
