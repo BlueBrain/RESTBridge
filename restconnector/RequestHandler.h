@@ -48,20 +48,19 @@ public:
 
 private:
 
-    typedef std::pair< lunchbox::uint128_t, std::string > ZeqEventDescriptor;
-
-    void onFirstHeartbeatEvent_();
+    void onStartupHeartbeatEvent_();
     void onHeartbeatEvent_();
-    void onKnownEvent_( const ::zeq::Event& event );
-    void addEventDescriptor_( const std::string& restName, const ZeqEventDescriptor& descriptor );
+    void onVocabularyEvent_( const zeq::Event& event );
+    void onEvent_( const zeq::Event& event );
+    void addEventDescriptor_( const zeq::EventDescriptor& eventDescriptor );
 
-    void processPUT_( const ::zeq::Event& event );
-    void processGET_( const ::zeq::Event& event );
-    void processPOST_( const ::zeq::Event& event );
+    void processPUT_( const zeq::Event& event );
+    void processGET_( const zeq::Event& event );
+    void processPOST_( const zeq::Event& event );
     void listen_();
 
-    boost::scoped_ptr< ::zeq::Subscriber > subscriber_;
-    boost::scoped_ptr< ::zeq::Publisher > publisher_;
+    boost::scoped_ptr< zeq::Subscriber > subscriber_;
+    boost::scoped_ptr< zeq::Publisher > publisher_;
 
     boost::mutex requestLock_;
 
@@ -71,7 +70,7 @@ private:
     server::request request_;
     server::response response_;
 
-    std::map< std::string, ZeqEventDescriptor > vocabulary_;
+    std::map< std::string, lunchbox::uint128_t > vocabulary_;
 };
 
 }
