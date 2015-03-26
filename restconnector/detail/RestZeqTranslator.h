@@ -2,8 +2,8 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#ifndef _RestZeqTranslator_h_
-#define _RestZeqTranslator_h_
+#ifndef RESTCONNECTOR_RESTZEQTRANSLATOR_H
+#define RESTCONNECTOR_RESTZEQTRANSLATOR_H
 
 #include <zeq/event.h>
 
@@ -13,6 +13,8 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 namespace restconnector
+{
+namespace detail
 {
 
 /**
@@ -47,5 +49,6 @@ private:
 };
 
 }
+}
 
-#endif // _RestZeqTranslator_h_
+#endif // RESTCONNECTOR_RESTZEQTRANSLATOR_H

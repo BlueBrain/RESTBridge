@@ -3,14 +3,22 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#ifndef _RequestHandler_h_
-#define _RequestHandler_h_
+#ifndef RESTCONNECTOR_REQUESTHANDLER_H
+#define RESTCONNECTOR_REQUESTHANDLER_H
 
 #include <restconnector/types.h>
-#include <restconnector/RestZeqTranslator.h>
+#include <zeq/types.h>
+
+#include <boost/network/protocol/http/server.hpp>
+#undef ECHO // On RedHat, ECHO is already defined and conflicts with the ECHO ZEq event
 
 namespace restconnector
 {
+namespace detail
+{
+
+class RequestHandler;
+typedef boost::network::http::server<RequestHandler> server;
 
 /**
  * The RequestHandler class handles incoming HTTP requests and
@@ -47,7 +55,6 @@ public:
     void log( server::string_type const &info );
 
 private:
-
     void onStartupHeartbeatEvent_();
     void onHeartbeatEvent_();
     void onVocabularyEvent_( const zeq::Event& event );
@@ -74,4 +81,5 @@ private:
 };
 
 }
-#endif // _RequestHandler_h_
+}
+#endif // RESTCONNECTOR_REQUESTHANDLER_H

@@ -2,9 +2,14 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#include <restconnector/RestConnector.h>
-#include <lunchbox/log.h>
+#include "RestConnector.h"
+#include "detail/RequestHandler.h"
+
 #include <lunchbox/debug.h>
+#include <lunchbox/log.h>
+#include <lunchbox/monitor.h>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread/thread.hpp>
 
 namespace restconnector
 {
@@ -12,36 +17,90 @@ namespace restconnector
 static const std::string PUBLISHER_SCHEMA_SUFFIX = "cmd://";
 static const std::string SUBSCRIBER_SCHEMA_SUFFIX = "resp://";
 
+namespace detail
+{
+class RestConnector
+{
+public:
+    RestConnector( const std::string& hostname, const uint16_t port )
+        : serverRunning_( false )
+        , hostname_( hostname )
+        , port_( port )
+    {
+    }
+
+    ~RestConnector()
+    {
+        if( serverRunning_ )
+        {
+            try
+            {
+                stop();
+            }
+            catch( ... ) {}
+        }
+    }
+
+    void run( const std::string& schema )
+    {
+        const std::string publisherSchema = schema + PUBLISHER_SCHEMA_SUFFIX;
+        const std::string subscriberSchema = schema + SUBSCRIBER_SCHEMA_SUFFIX;
+        RequestHandler handler( publisherSchema, subscriberSchema );
+
+        server::options options( handler );
+        std::stringstream port;
+        port << port_;
+        httpServer_.reset( new server( options.address( hostname_ ).port( port.str( ))));
+
+        LBINFO << "HTTP Server runnning on " << hostname_ << ":" << port_ << std::endl;
+        LBINFO << "ZeroEq Publisher Schema : " << publisherSchema << std::endl;
+        LBINFO << "ZeroEq Subscriber Schema: " << subscriberSchema << std::endl;
+        serverRunning_ = true;
+        httpServer_->run();
+    }
+
+    void stop()
+    {
+        if( !thread_ || !serverRunning_ )
+            LBTHROW( std::runtime_error( "HTTP server is not running, cannot stop it" ));
+        httpServer_->stop();
+        thread_->join();
+        serverRunning_ = false;
+        LBINFO << "HTTP Server on " << hostname_ << ":" << port_
+               << " is stopped" << std::endl;
+    }
+
+    boost::scoped_ptr< boost::thread > thread_;
+    boost::scoped_ptr< server > httpServer_;
+    lunchbox::Monitor< bool > serverRunning_;
+    std::string hostname_;
+    uint16_t port_;
+};
+}
+
 RestConnector::RestConnector( const std::string& hostname, const uint16_t port )
-    : hostname_( hostname )
-    , port_( port )
+    : _impl( new detail::RestConnector( hostname, port ))
 {
-    LBASSERT( !hostname.empty() );
 }
 
-RestConnector::~RestConnector(){}
-
-void RestConnector::RestConnector::run( const std::string& schema ) const
+RestConnector::~RestConnector()
 {
-    boost::thread main( boost::bind( &RestConnector::run_, this, schema ) );
-    main.join();
+    delete _impl;
 }
 
-void RestConnector::RestConnector::run_( const std::string& schema ) const
+void RestConnector::run( const std::string& schema )
 {
-    const std::string publisherSchema = schema + PUBLISHER_SCHEMA_SUFFIX;
-    const std::string subscriberSchema = schema + SUBSCRIBER_SCHEMA_SUFFIX;
-    RequestHandler handler( publisherSchema, subscriberSchema );
+    if( _impl->thread_ )
+        LBTHROW( std::runtime_error( "HTTP server is already running" ));
+    _impl->thread_.reset( new boost::thread(
+        boost::bind( &detail::RestConnector::run, _impl, schema )));
+    if( ! _impl->serverRunning_.timedWaitEQ( true, 2000 ))
+        LBTHROW( std::runtime_error( "HTTP server could not be started" ));
+}
 
-    server::options options( handler );
-    std::stringstream port;
-    port << port_;
-    server httpServer( options.address( hostname_ ).port( port.str() ) );
-
-    LBINFO << "HTTP Server runnning on " << hostname_ << ":" << port_ << std::endl;
-    LBINFO << "ZeroEq Publisher Schema : " << publisherSchema << std::endl;
-    LBINFO << "ZeroEq Subscriber Schema: " << subscriberSchema << std::endl;
-    httpServer.run();
+void RestConnector::stop()
+{
+    _impl->stop();
 }
 
 }

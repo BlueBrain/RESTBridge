@@ -4,15 +4,20 @@
 
 source_group(\\ FILES CMakeLists.txt)
 
-set(RESTCONNECTOR_PUBLIC_HEADERS ${COMMON_INCLUDES} RequestHandler.h
-                                                    RestConnector.h
-                                                    RestZeqTranslator.h
-                                                    types.h)
-set(RESTCONNECTOR_HEADERS)
-set(RESTCONNECTOR_SOURCES ${COMMON_SOURCES} RestConnector.cpp
-                                            RequestHandler.cpp
-                                            RestZeqTranslator.cpp)
+set(RESTCONNECTOR_PUBLIC_HEADERS
+  ${COMMON_INCLUDES}
+  RestConnector.h
+  types.h)
+set(RESTCONNECTOR_HEADERS
+  detail/RequestHandler.h
+  detail/RestZeqTranslator.h)
+set(RESTCONNECTOR_SOURCES
+  ${COMMON_SOURCES}
+  RestConnector.cpp
+  detail/RequestHandler.cpp
+  detail/RestZeqTranslator.cpp)
 
-set(RESTCONNECTOR_LINK_LIBRARIES ${Boost_LIBRARIES} ${LUNCHBOX_LIBRARIES} ${ZEQ_LIBRARIES} ${CPPNETLIB_LIBRARIES} pthread)
+set(RESTCONNECTOR_LINK_LIBRARIES ${Boost_LIBRARIES} ${LUNCHBOX_LIBRARIES}
+  ${ZEQ_LIBRARIES} ${CPPNETLIB_LIBRARIES} pthread)
 
 common_library(RESTConnector)

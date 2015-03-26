@@ -3,8 +3,8 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#include <restconnector/RequestHandler.h>
-#include <restconnector/RestZeqTranslator.h>
+#include "RequestHandler.h"
+#include "RestZeqTranslator.h"
 
 #include <zeq/zeq.h>
 
@@ -14,6 +14,8 @@
 #include <lunchbox/log.h>
 
 namespace restconnector
+{
+namespace detail
 {
 
 RequestHandler::RequestHandler( const std::string& publisherSchema,
@@ -34,6 +36,7 @@ RequestHandler::~RequestHandler()
 {
     listening_ = false;
     listeningThread_->join();
+    requestLock_.unlock();
 }
 
 void RequestHandler::listen_()
@@ -144,4 +147,5 @@ void RequestHandler::log( server::string_type const &info )
     LBERROR << info << std::endl;
 }
 
+}
 }
