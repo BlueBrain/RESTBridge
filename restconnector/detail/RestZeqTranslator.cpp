@@ -15,6 +15,8 @@ namespace restconnector
 namespace detail
 {
 
+RestZeqTranslator::RestZeqTranslatorException::~RestZeqTranslatorException() {}
+
 RestZeqTranslator::RestZeqTranslator()
 {
 }
@@ -23,54 +25,67 @@ RestZeqTranslator::~RestZeqTranslator()
 {
 }
 
-::zeq::Event RestZeqTranslator::translate( const std::string& body ) const
+zeq::Event RestZeqTranslator::translate ( const std::string& request, const std::string& body ) const
 {
-    //Here we should use the rest2Zeq mapper that need to be created in zeq::vocabulary
-    if( command_ == "setCamera" )
-        // This must be in the vocabulary
-        // The vacabulary is responsible for returning the
-        // zeq event
-        return zeq::vocabulary::serializeJSON( zeq::hbp::EVENT_CAMERA, body );
-    if( command_ == "request" )
-        //  This must be in the vocabulary
-        return zeq::vocabulary::serializeRequest( zeq::hbp::EVENT_IMAGEJPEG );
-    return zeq::vocabulary::serializeEcho("Unknown REST command");
+    const std::string& command = getCommand_( request );
+
+    VocabularyMap::const_iterator it = vocabularySubscribed_.find( command );
+    if( it == vocabularySubscribed_.end() )
+        LBTHROW(CommandNotFound( command ) );
+
+    return zeq::vocabulary::serializeJSON( it->second, body );
 }
 
-bool RestZeqTranslator::isCommandSupported( const std::string& request )
+zeq::Event RestZeqTranslator::translate( const std::string& request ) const
 {
+    const std::string& command = getCommand_( request );
+
+    VocabularyMap::const_iterator it = vocabularyPublished_.find( command );
+    if( it == vocabularyPublished_.end() )
+        LBTHROW(CommandNotFound( "Error: " + command ) );
+
+    return zeq::vocabulary::serializeRequest( it->second );
+}
+
+std::string RestZeqTranslator::getCommand_( const std::string& request ) const
+{
+    if( request.empty() )
+        LBTHROW(InvalidRequest("Empty request") );
+
     lunchbox::Strings dataParts;
 
-    if( request.empty() )
-    {
-        LBINFO << "Error: The request string is empty." << std::endl;
-        return false;
-    }
-
     boost::split( dataParts, request, boost::is_any_of( "/" ) );
-    std::vector<std::string> commandAndPayload;
+    lunchbox::Strings commandAndPayload;
     boost::split( commandAndPayload, dataParts.back(), boost::is_any_of( "?" ) );
 
-    if( commandAndPayload.empty() )
-        return false;
+    if( ( commandAndPayload.empty() ) || commandAndPayload.front().empty() )
+        LBTHROW(InvalidRequest("Empty command string") );
 
-    if( commandAndPayload[0] == "")
-        return false;
+    //We insure that REST command is lowercase because urls are not case sensitive
+    std::transform( commandAndPayload.front().begin(), commandAndPayload.front().end(),
+                    commandAndPayload.front().begin(), ::tolower );
 
-    command_ = commandAndPayload[0];
-    return checkCommandValidity_( command_ );
+    return commandAndPayload.front();
 }
 
-bool RestZeqTranslator::checkCommandValidity_( const std::string& command ) const
+void RestZeqTranslator::addPublishedEvent( const std::string& restName,
+                                           const lunchbox::uint128_t& event )
 {
-    //Here we should use the rest2Zeq mapper that need to be created in zeq::vocabulary
-    if( command == "setCamera" )
-        return true;
-    else if( command == "request" )
-        return true;
+    //We insure that restName is lowercase because urls are not case sensitive
+    std::string lowercaseRestName = restName;
+    std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
+                    lowercaseRestName.begin(), ::tolower );
+    vocabularyPublished_[ lowercaseRestName ] = event;
+}
 
-    LBINFO << "Unknown REST command " << command << std::endl;
-    return false;
+void RestZeqTranslator::addSubscribedEvent( const std::string& restName,
+                                            const lunchbox::uint128_t& event )
+{
+    //We insure that restName is lowercase because urls are not case sensitive
+    std::string lowercaseRestName = restName;
+    std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
+                    lowercaseRestName.begin(), ::tolower );
+    vocabularySubscribed_[ lowercaseRestName ] = event;
 }
 
 }

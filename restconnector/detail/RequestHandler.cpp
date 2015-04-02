@@ -4,7 +4,6 @@
  */
 
 #include "RequestHandler.h"
-#include "RestZeqTranslator.h"
 
 #include <zeq/zeq.h>
 
@@ -47,35 +46,27 @@ void RequestHandler::listen_()
 
 void RequestHandler::operator() ( const server::request &request, server::response &response )
 {
-    server::string_type ip = source( request );
-    RestZeqTranslator restZeqTranslator;
+    const std::string& method = request.method;
 
-    if ( !restZeqTranslator.isCommandSupported( request.destination ) )
+    try
+    {
+        if( ( method == REST_VERB_PUT ) || ( method == REST_VERB_POST ) )
+        {
+            const zeq::Event& event = restZeqTranslator_.translate( request.destination,
+                                                                        request.body );
+            processPUT_( event );
+        }
+        else if( method == REST_VERB_GET )
+        {
+            const zeq::Event& event = restZeqTranslator_.translate( request.destination );
+            processGET_( event );
+        }
+        response = response_;
+    }
+    catch( const std::runtime_error& e )
     {
         response = server::response::stock_reply( server::response::bad_request,
-                                                  "Command not found." );
-    }
-    else
-    {
-        const std::string& method = request.method;
-        try
-        {
-            const ::zeq::Event zeqEvent = restZeqTranslator.translate( request.body );
-
-            if( method == "PUT" )
-                processPUT_( zeqEvent );
-            else if( method == "GET" )
-                processGET_( zeqEvent );
-            else if( method == "POST" )
-                processPOST_( zeqEvent );
-
-            response = response_;
-        }
-        catch( const std::runtime_error& e )
-        {
-            response = server::response::stock_reply( server::response::bad_request,
-                                                      e.what() );
-        }
+                                                  e.what() );
     }
 }
 
@@ -93,13 +84,6 @@ void RequestHandler::processGET_( const zeq::Event& event )
     //We lock here because we need to wait for the response before new requests are processed.
     //This is unlocked when the response for the published event is received.
     requestLock_.lock();
-}
-
-void RequestHandler::processPOST_( const zeq::Event& event )
-{
-    publisher_->publish( event  );
-    std::ostringstream data;
-    response_ = server::response::stock_reply( server::response::ok, data.str() );
 }
 
 void RequestHandler::onEvent_( const zeq::Event& event )
@@ -137,9 +121,20 @@ void RequestHandler::onVocabularyEvent_( const zeq::Event& event )
 void RequestHandler::addEventDescriptor_( const zeq::EventDescriptor& eventDescriptor )
 {
     zeq::vocabulary::registerEvent( eventDescriptor.getEventType(), eventDescriptor.getSchema() );
-    vocabulary_[ eventDescriptor.getRestName() ] = eventDescriptor.getEventType();
-    subscriber_->registerHandler( eventDescriptor.getEventType(),
-                                  boost::bind( &RequestHandler::onEvent_, this, _1 ) );
+    if( ( eventDescriptor.getEventDirection() == zeq::PUBLISHER ) ||
+        ( eventDescriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
+    {
+        restZeqTranslator_.addPublishedEvent( eventDescriptor.getRestName(),
+                                              eventDescriptor.getEventType() );
+        subscriber_->registerHandler( eventDescriptor.getEventType(),
+                                      boost::bind( &RequestHandler::onEvent_, this, _1 ) );
+    }
+    if( ( eventDescriptor.getEventDirection() == zeq::SUBSCRIBER ) ||
+        ( eventDescriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
+    {
+        restZeqTranslator_.addSubscribedEvent( eventDescriptor.getRestName(),
+                                               eventDescriptor.getEventType() );
+    }
 }
 
 void RequestHandler::log( server::string_type const &info )
