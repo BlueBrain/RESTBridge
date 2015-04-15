@@ -9,8 +9,6 @@
 #include <restconnector/types.h>
 #include <restconnector/detail/RestZeqTranslator.h>
 
-#include <zeq/types.h>
-
 #include <boost/network/protocol/http/server.hpp>
 #undef ECHO // On RedHat, ECHO is already defined and conflicts with the ECHO ZEq event
 

@@ -3,12 +3,21 @@
  */
 
 #include "RestZeqTranslator.h"
+
+#include <zeq/zeq.h>
 #include <zeq/hbp/vocabulary.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <lunchbox/log.h>
 
 #include <iostream>
+
+static const std::string JSON_COMMAND = "command";
+static const std::string JSON_SCHEMA = "schema";
+static const std::string JSON_SUBSCRIBER = "subscribed";
+static const std::string JSON_PUBLISHED = "published";
 
 namespace restconnector
 {
@@ -27,27 +36,27 @@ RestZeqTranslator::~RestZeqTranslator()
 
 zeq::Event RestZeqTranslator::translate ( const std::string& request, const std::string& body ) const
 {
-    const std::string& command = getCommand_( request );
+    const std::string& command = getCommand( request );
 
     VocabularyMap::const_iterator it = vocabularySubscribed_.find( command );
     if( it == vocabularySubscribed_.end() )
         LBTHROW(CommandNotFound( command ) );
 
-    return zeq::vocabulary::serializeJSON( it->second, body );
+    return zeq::vocabulary::serializeJSON( it->second.eventType_, body );
 }
 
 zeq::Event RestZeqTranslator::translate( const std::string& request ) const
 {
-    const std::string& command = getCommand_( request );
+    const std::string& command = getCommand( request );
 
     VocabularyMap::const_iterator it = vocabularyPublished_.find( command );
     if( it == vocabularyPublished_.end() )
-        LBTHROW(CommandNotFound( "Error: " + command ) );
+        LBTHROW(CommandNotFound( command ) );
 
-    return zeq::vocabulary::serializeRequest( it->second );
+    return zeq::vocabulary::serializeRequest( it->second.eventType_ );
 }
 
-std::string RestZeqTranslator::getCommand_( const std::string& request ) const
+std::string RestZeqTranslator::getCommand( const std::string& request ) const
 {
     if( request.empty() )
         LBTHROW(InvalidRequest("Empty request") );
@@ -68,24 +77,52 @@ std::string RestZeqTranslator::getCommand_( const std::string& request ) const
     return commandAndPayload.front();
 }
 
-void RestZeqTranslator::addPublishedEvent( const std::string& restName,
-                                           const lunchbox::uint128_t& event )
+void RestZeqTranslator::addPublishedEvent( const zeq::EventDescriptor& eventDescriptor )
 {
     //We insure that restName is lowercase because urls are not case sensitive
-    std::string lowercaseRestName = restName;
+    std::string lowercaseRestName = eventDescriptor.getRestName();
     std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
                     lowercaseRestName.begin(), ::tolower );
-    vocabularyPublished_[ lowercaseRestName ] = event;
+    vocabularyPublished_[ lowercaseRestName ] = zeqEventDescriptor( eventDescriptor.getEventType(),
+                                                                    eventDescriptor.getSchema() );
 }
 
-void RestZeqTranslator::addSubscribedEvent( const std::string& restName,
-                                            const lunchbox::uint128_t& event )
+void RestZeqTranslator::addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor )
 {
     //We insure that restName is lowercase because urls are not case sensitive
-    std::string lowercaseRestName = restName;
+    std::string lowercaseRestName = eventDescriptor.getRestName();
     std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
                     lowercaseRestName.begin(), ::tolower );
-    vocabularySubscribed_[ lowercaseRestName ] = event;
+    vocabularySubscribed_[ lowercaseRestName ] = zeqEventDescriptor( eventDescriptor.getEventType(),
+                                                                     eventDescriptor.getSchema() );
+}
+
+std::string RestZeqTranslator::getVocabulary() const
+{
+    boost::property_tree::ptree vocabulary;
+    boost::property_tree::ptree subscribedVocabulary;
+
+    for ( VocabularyMap::const_iterator it = vocabularySubscribed_.begin();
+          it != vocabularySubscribed_.end(); ++it )
+    {
+        subscribedVocabulary.put( JSON_COMMAND, it->first );
+        subscribedVocabulary.put( JSON_SCHEMA, it->second.eventSchema_ );
+    }
+
+    vocabulary.add_child( JSON_SUBSCRIBER, subscribedVocabulary );
+    boost::property_tree::ptree publishedVocabulary;
+
+    for ( VocabularyMap::const_iterator it = vocabularyPublished_.begin();
+          it != vocabularyPublished_.end(); ++it )
+    {
+        publishedVocabulary.put( JSON_COMMAND, it->first );
+        publishedVocabulary.put( JSON_SCHEMA, it->second.eventSchema_ );
+    }
+
+    vocabulary.add_child( JSON_PUBLISHED, publishedVocabulary );
+    std::ostringstream json;
+    boost::property_tree::write_json( json, vocabulary, false );
+    return json.str();
 }
 
 }

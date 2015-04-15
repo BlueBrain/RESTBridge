@@ -50,10 +50,15 @@ void RequestHandler::operator() ( const server::request &request, server::respon
 
     try
     {
-        if( ( method == REST_VERB_PUT ) || ( method == REST_VERB_POST ) )
+        if( restZeqTranslator_.getCommand( request.destination ) == INTERNAL_CMD_VOCABULARY )
+        {
+            const std::string& vocabulary = restZeqTranslator_.getVocabulary();
+            response_ = server::response::stock_reply( server::response::ok, vocabulary );
+        }
+        else if( ( method == REST_VERB_PUT ) || ( method == REST_VERB_POST ) )
         {
             const zeq::Event& event = restZeqTranslator_.translate( request.destination,
-                                                                        request.body );
+                                                                    request.body );
             processPUT_( event );
         }
         else if( method == REST_VERB_GET )
@@ -124,16 +129,14 @@ void RequestHandler::addEventDescriptor_( const zeq::EventDescriptor& eventDescr
     if( ( eventDescriptor.getEventDirection() == zeq::PUBLISHER ) ||
         ( eventDescriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
     {
-        restZeqTranslator_.addPublishedEvent( eventDescriptor.getRestName(),
-                                              eventDescriptor.getEventType() );
+        restZeqTranslator_.addPublishedEvent( eventDescriptor );
         subscriber_->registerHandler( eventDescriptor.getEventType(),
                                       boost::bind( &RequestHandler::onEvent_, this, _1 ) );
     }
     if( ( eventDescriptor.getEventDirection() == zeq::SUBSCRIBER ) ||
         ( eventDescriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
     {
-        restZeqTranslator_.addSubscribedEvent( eventDescriptor.getRestName(),
-                                               eventDescriptor.getEventType() );
+        restZeqTranslator_.addSubscribedEvent( eventDescriptor );
     }
 }
 
