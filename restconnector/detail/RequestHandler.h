@@ -7,6 +7,8 @@
 #define RESTCONNECTOR_REQUESTHANDLER_H
 
 #include <restconnector/types.h>
+#include <restconnector/detail/RestZeqTranslator.h>
+
 #include <zeq/types.h>
 
 #include <boost/network/protocol/http/server.hpp>
@@ -19,6 +21,12 @@ namespace detail
 
 class RequestHandler;
 typedef boost::network::http::server<RequestHandler> server;
+
+static const std::string REST_VERB_GET = "GET";
+static const std::string REST_VERB_PUT = "PUT";
+static const std::string REST_VERB_DELETE = "DELETE";
+static const std::string REST_VERB_PATCH = "PATCH";
+static const std::string REST_VERB_POST = "POST";
 
 /**
  * The RequestHandler class handles incoming HTTP requests and
@@ -63,7 +71,6 @@ private:
 
     void processPUT_( const zeq::Event& event );
     void processGET_( const zeq::Event& event );
-    void processPOST_( const zeq::Event& event );
     void listen_();
 
     boost::scoped_ptr< zeq::Subscriber > subscriber_;
@@ -77,7 +84,7 @@ private:
     server::request request_;
     server::response response_;
 
-    std::map< std::string, lunchbox::uint128_t > vocabulary_;
+    RestZeqTranslator restZeqTranslator_;
 };
 
 }

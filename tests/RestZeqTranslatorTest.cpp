@@ -12,37 +12,37 @@
 #include <boost/test/unit_test.hpp>
 #include <restconnector/detail/RestZeqTranslator.h>
 
-#include <zeq/hbp/vocabulary.h>
+#include <zeq/zeq.h>
+#include <zeq/hbp/hbp.h>
 
-BOOST_AUTO_TEST_CASE( test_cameraEvent )
+BOOST_AUTO_TEST_CASE( test_EventSUBSCRIBED )
 {
+    restconnector::detail::RestZeqTranslator restZeqTranslator;
+
+    restZeqTranslator.addSubscribedEvent( zeq::hbp::CAMERA, zeq::hbp::EVENT_CAMERA );
+
     std::vector< float > matrixData = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
                                         0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     const std::string& bodyJSON = { "{\"matrix\": \[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}" } ;
+    const std::string commandString = "CAMERA";
 
-    restconnector::detail::RestZeqTranslator restzeqTranslator;
-    const std::string commandString = "setCamera";
-
-    const bool result = restzeqTranslator.isCommandSupported( commandString );
-    BOOST_CHECK_EQUAL( result, true );
-
-    const zeq::Event& zeqEvent = restzeqTranslator.translate( bodyJSON );
+    const zeq::Event& zeqEvent = restZeqTranslator.translate( commandString, bodyJSON );
 
     const std::vector< float >& deserialized = zeq::hbp::deserializeCamera( zeqEvent );
 
     BOOST_CHECK_EQUAL_COLLECTIONS( matrixData.begin(), matrixData.end(),
-                                   deserialized.begin(), deserialized.end( ));
+                                   deserialized.begin(), deserialized.end( ) );
 }
 
-BOOST_AUTO_TEST_CASE( test_requestEvent )
+BOOST_AUTO_TEST_CASE( test_EventPUBLISHED )
 {
-    restconnector::detail::RestZeqTranslator restzeqTranslator;
-    const std::string commandString = "request";
+    restconnector::detail::RestZeqTranslator restZeqTranslator;
 
-    const bool result = restzeqTranslator.isCommandSupported( commandString );
-    BOOST_CHECK_EQUAL( result, true );
+    restZeqTranslator.addPublishedEvent( zeq::hbp::IMAGEJPEG, zeq::hbp::EVENT_IMAGEJPEG );
 
-    const zeq::Event& zeqEvent = restzeqTranslator.translate( "" );
+    const std::string commandString = "IMAGEJPEG";
+
+    const zeq::Event& zeqEvent = restZeqTranslator.translate( commandString );
 
     BOOST_CHECK_EQUAL( zeq::hbp::EVENT_IMAGEJPEG,
                        zeq::vocabulary::deserializeRequest( zeqEvent ) );
@@ -50,9 +50,22 @@ BOOST_AUTO_TEST_CASE( test_requestEvent )
 
 BOOST_AUTO_TEST_CASE( test_unknownEvent )
 {
-    restconnector::detail::RestZeqTranslator restzeqTranslator;
+    restconnector::detail::RestZeqTranslator restZeqTranslator;
+
+    restZeqTranslator.addSubscribedEvent( zeq::hbp::CAMERA, zeq::hbp::EVENT_CAMERA );
+
     const std::string commandString = "IDDQD";
 
-    const bool result = restzeqTranslator.isCommandSupported( commandString );
-    BOOST_CHECK_EQUAL( result, false );
+    bool test;
+
+    try
+    {
+        restZeqTranslator.translate( commandString );
+        test = true;
+    }
+    catch( const restconnector::detail::RestZeqTranslator::RestZeqTranslatorException& e )
+    {
+        test = false;
+    }
+    BOOST_CHECK_EQUAL( test, false );
 }
