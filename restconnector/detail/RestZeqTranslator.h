@@ -9,17 +9,12 @@
 
 #include <map>
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// CAUTION FOR REVIEWERS: This class is under development. Expect serious
-// changes in the next review.
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 namespace restconnector
 {
 namespace detail
 {
 
-typedef std::map< std::string, lunchbox::uint128_t > VocabularyMap;
+static const std::string INTERNAL_CMD_VOCABULARY = "vocabulary";
 
 /**
  * The RestZeqTranslator class is responsible translating REST commands
@@ -78,24 +73,49 @@ public:
 
     /**
      * Add an event of type PUBLISHER into RestZeqTranslator known events map.
-     * @param restName The string used for REST command
-     * @param event The zeq event's uint128
+     * @param eventDescpriptor The desciptor of the event (restName, eventType, eventSchema )
      */
-    void addPublishedEvent( const std::string& restName, const lunchbox::uint128_t& event );
+    void addPublishedEvent( const zeq::EventDescriptor& eventDescriptor );
 
     /**
      * Add an event of type SUBSCRIBER into RestZeqTranslator known events map.
-     * @param restName The string used for REST command
-     * @param event The zeq event's uint128
+     * @param eventDescpriptor The desciptor of the event (restName, eventType, eventSchema )
      */
-    void addSubscribedEvent( const std::string& restName, const lunchbox::uint128_t& event );
+    void addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor );
+
+    /**
+     * Retreive the REST command from the http request.
+     * @param request A string containing the http request
+     * @return A string containing the REST command
+     */
+    std::string getCommand( const std::string& request ) const;
+
+    /**
+     * Return a string with the known vocabulary.
+     * @return The string with the known vocabulary
+     */
+    std::string getVocabulary() const;
 
 private:
+
+    struct zeqEventDescriptor
+    {
+        zeqEventDescriptor() {}
+
+        zeqEventDescriptor( lunchbox::uint128_t eventType, std::string eventSchema  )
+            : eventType_( eventType )
+            , eventSchema_( eventSchema )
+        {}
+
+        lunchbox::uint128_t eventType_;
+        std::string eventSchema_;
+    };
+
+    typedef std::map< std::string, zeqEventDescriptor > VocabularyMap;
 
     VocabularyMap vocabularyPublished_;
     VocabularyMap vocabularySubscribed_;
 
-    std::string getCommand_( const std::string& request ) const;
     std::string command_;
 
 };
