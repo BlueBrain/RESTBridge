@@ -2,11 +2,11 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#include <restconnector/RestConnector.h>
+#include <restbridge/RestBridge.h>
 #include <lunchbox/log.h>
 #include <boost/program_options.hpp>
 
-using namespace restconnector;
+using namespace restbridge;
 namespace po = boost::program_options;
 
 #define PARAM_HOST   "host"
@@ -38,7 +38,7 @@ int main( int argc, char * argv[] )
 
     try
     {
-        RestConnector mainServer(
+        RestBridge mainServer(
             vm[ PARAM_HOST ].as< std::string >() ,
             boost::lexical_cast<uint16_t>( vm[ PARAM_PORT ].as< std::string >()));
         mainServer.run( vm[ PARAM_SCHEMA ].as< std::string >());

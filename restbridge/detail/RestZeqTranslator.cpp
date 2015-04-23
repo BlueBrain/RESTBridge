@@ -19,7 +19,7 @@ static const std::string JSON_SCHEMA = "schema";
 static const std::string JSON_SUBSCRIBER = "subscribed";
 static const std::string JSON_PUBLISHED = "published";
 
-namespace restconnector
+namespace restbridge
 {
 namespace detail
 {

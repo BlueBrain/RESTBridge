@@ -1,0 +1,13 @@
+apps/RESTBridge.cpp
+restconnector/detail/RequestHandler.cpp
+restconnector/detail/RequestHandler.h
+restconnector/detail/RestZeqTranslator.cpp
+restconnector/detail/RestZeqTranslator.h
+restconnector/RestBridge.cpp
+restconnector/RestBridge.h
+restconnector/types.h
+tests/RestConnector.cpp
+tests/RestZeqTranslatorTest.cpp
+CMakeLists.txt
+restconnector/CMakeLists.txt
+apps/CMakeLists.txt

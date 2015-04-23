@@ -2,7 +2,7 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#include "RestConnector.h"
+#include "RestBridge.h"
 #include "detail/RequestHandler.h"
 
 #include <lunchbox/debug.h>
@@ -11,7 +11,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 
-namespace restconnector
+namespace restbridge
 {
 
 static const std::string PUBLISHER_SCHEMA_SUFFIX = "cmd://";
@@ -19,17 +19,17 @@ static const std::string SUBSCRIBER_SCHEMA_SUFFIX = "resp://";
 
 namespace detail
 {
-class RestConnector
+class RestBridge
 {
 public:
-    RestConnector( const std::string& hostname, const uint16_t port )
+    RestBridge( const std::string& hostname, const uint16_t port )
         : serverRunning_( false )
         , hostname_( hostname )
         , port_( port )
     {
     }
 
-    ~RestConnector()
+    ~RestBridge()
     {
         if( serverRunning_ )
         {
@@ -78,27 +78,27 @@ public:
 };
 }
 
-RestConnector::RestConnector( const std::string& hostname, const uint16_t port )
-    : _impl( new detail::RestConnector( hostname, port ))
+RestBridge::RestBridge( const std::string& hostname, const uint16_t port )
+    : _impl( new detail::RestBridge( hostname, port ))
 {
 }
 
-RestConnector::~RestConnector()
+RestBridge::~RestBridge()
 {
     delete _impl;
 }
 
-void RestConnector::run( const std::string& schema )
+void RestBridge::run( const std::string& schema )
 {
     if( _impl->thread_ )
         LBTHROW( std::runtime_error( "HTTP server is already running" ));
     _impl->thread_.reset( new boost::thread(
-        boost::bind( &detail::RestConnector::run, _impl, schema )));
+        boost::bind( &detail::RestBridge::run, _impl, schema )));
     if( ! _impl->serverRunning_.timedWaitEQ( true, 2000 ))
         LBTHROW( std::runtime_error( "HTTP server could not be started" ));
 }
 
-void RestConnector::stop()
+void RestBridge::stop()
 {
     _impl->stop();
 }

@@ -12,7 +12,7 @@
 #include <lunchbox/uri.h>
 #include <lunchbox/log.h>
 
-namespace restconnector
+namespace restbridge
 {
 namespace detail
 {

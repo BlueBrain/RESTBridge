@@ -9,7 +9,7 @@
 
 #include <map>
 
-namespace restconnector
+namespace restbridge
 {
 namespace detail
 {

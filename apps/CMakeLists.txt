@@ -4,7 +4,7 @@
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-set(RESTCONNECTOR_SOURCES RESTConnector.cpp)
-set(RESTCONNECTOR_LINK_LIBRARIES RESTConnector)
+set(RESTBRIDGE_SOURCES RESTBridge.cpp)
+set(RESTBRIDGE_LINK_LIBRARIES RESTBridge)
 
-common_application(restConnector)
+common_application(restBridge)
