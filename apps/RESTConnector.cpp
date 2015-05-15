@@ -6,7 +6,6 @@
 #include <lunchbox/log.h>
 #include <boost/program_options.hpp>
 
-using namespace restconnector;
 namespace po = boost::program_options;
 
 #define PARAM_HOST   "host"
@@ -38,7 +37,7 @@ int main( int argc, char * argv[] )
 
     try
     {
-        RestConnector mainServer(
+        restconnector::RestConnector mainServer(
             vm[ PARAM_HOST ].as< std::string >() ,
             boost::lexical_cast<uint16_t>( vm[ PARAM_PORT ].as< std::string >()));
         mainServer.run( vm[ PARAM_SCHEMA ].as< std::string >());

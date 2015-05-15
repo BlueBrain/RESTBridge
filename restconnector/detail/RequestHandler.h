@@ -10,6 +10,7 @@
 #include <restconnector/detail/RestZeqTranslator.h>
 
 #include <boost/network/protocol/http/server.hpp>
+#include <boost/scoped_ptr.hpp>
 #undef ECHO // On RedHat, ECHO is already defined and conflicts with the ECHO ZEq event
 
 namespace restconnector
