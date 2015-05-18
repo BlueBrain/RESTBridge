@@ -1,8 +1,23 @@
 /* Copyright (c) 2014-2015, Human Brain Project
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
- */
+ *
+ * This file is part of RESTBridge <https://github.com/BlueBrain/RESTBridge>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
 
-#include "RestConnector.h"
+#include "RestBridge.h"
 #include "detail/RequestHandler.h"
 
 #include <lunchbox/debug.h>
@@ -11,7 +26,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 
-namespace restconnector
+namespace restbridge
 {
 
 static const std::string PUBLISHER_SCHEMA_SUFFIX = "cmd://";
@@ -19,17 +34,17 @@ static const std::string SUBSCRIBER_SCHEMA_SUFFIX = "resp://";
 
 namespace detail
 {
-class RestConnector
+class RestBridge
 {
 public:
-    RestConnector( const std::string& hostname, const uint16_t port )
+    RestBridge( const std::string& hostname, const uint16_t port )
         : serverRunning_( false )
         , hostname_( hostname )
         , port_( port )
     {
     }
 
-    ~RestConnector()
+    ~RestBridge()
     {
         if( serverRunning_ )
         {
@@ -78,27 +93,27 @@ public:
 };
 }
 
-RestConnector::RestConnector( const std::string& hostname, const uint16_t port )
-    : _impl( new detail::RestConnector( hostname, port ))
+RestBridge::RestBridge( const std::string& hostname, const uint16_t port )
+    : _impl( new detail::RestBridge( hostname, port ))
 {
 }
 
-RestConnector::~RestConnector()
+RestBridge::~RestBridge()
 {
     delete _impl;
 }
 
-void RestConnector::run( const std::string& schema )
+void RestBridge::run( const std::string& schema )
 {
     if( _impl->thread_ )
         LBTHROW( std::runtime_error( "HTTP server is already running" ));
     _impl->thread_.reset( new boost::thread(
-        boost::bind( &detail::RestConnector::run, _impl, schema )));
+        boost::bind( &detail::RestBridge::run, _impl, schema )));
     if( ! _impl->serverRunning_.timedWaitEQ( true, 2000 ))
         LBTHROW( std::runtime_error( "HTTP server could not be started" ));
 }
 
-void RestConnector::stop()
+void RestBridge::stop()
 {
     _impl->stop();
 }

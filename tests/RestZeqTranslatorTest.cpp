@@ -10,14 +10,14 @@
 #define BOOST_TEST_MODULE restZeqTranslator
 
 #include <boost/test/unit_test.hpp>
-#include <restconnector/detail/RestZeqTranslator.h>
+#include <restbridge/detail/RestZeqTranslator.h>
 
 #include <zeq/zeq.h>
 #include <zeq/hbp/hbp.h>
 
 BOOST_AUTO_TEST_CASE( test_EventSUBSCRIBED )
 {
-    restconnector::detail::RestZeqTranslator restZeqTranslator;
+    restbridge::detail::RestZeqTranslator restZeqTranslator;
 
     zeq::EventDescriptor eventDescpritor( zeq::hbp::CAMERA, zeq::hbp::EVENT_CAMERA,
                                           zeq::hbp::SCHEMA_CAMERA, zeq::BIDIRECTIONAL );
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( test_EventSUBSCRIBED )
 
 BOOST_AUTO_TEST_CASE( test_EventPUBLISHED )
 {
-    restconnector::detail::RestZeqTranslator restZeqTranslator;
+    restbridge::detail::RestZeqTranslator restZeqTranslator;
 
     zeq::EventDescriptor eventDescpritor( zeq::hbp::IMAGEJPEG, zeq::hbp::EVENT_IMAGEJPEG,
                                           zeq::hbp::SCHEMA_IMAGEJPEG, zeq::PUBLISHER );
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( test_EventPUBLISHED )
 
 BOOST_AUTO_TEST_CASE( test_unknownEvent )
 {
-    restconnector::detail::RestZeqTranslator restZeqTranslator;
+    restbridge::detail::RestZeqTranslator restZeqTranslator;
 
     zeq::EventDescriptor eventDescpritor( zeq::hbp::CAMERA, zeq::hbp::EVENT_CAMERA,
                                           zeq::hbp::SCHEMA_CAMERA, zeq::BIDIRECTIONAL );
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( test_unknownEvent )
         restZeqTranslator.translate( commandString );
         test = true;
     }
-    catch( const restconnector::detail::RestZeqTranslator::RestZeqTranslatorException& e )
+    catch( const restbridge::detail::RestZeqTranslator::RestZeqTranslatorException& e )
     {
         test = false;
     }

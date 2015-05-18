@@ -1,4 +1,4 @@
-# Copyright (c) BBP/EPFL 2011-2015
+# Copyright (c) BBP/EPFL 2011-2014
 #                        Grigori.Chevtchenko@epfl.ch
 #
 # This file is part of RESTBridge <https://github.com/BlueBrain/RESTBridge>
@@ -16,9 +16,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+source_group(\\ FILES CMakeLists.txt)
 
-set(RESTBRIDGE_SOURCES RESTBridge.cpp)
-set(RESTBRIDGE_LINK_LIBRARIES RESTBridge)
+set(RESTBRIDGE_PUBLIC_HEADERS
+  ${COMMON_INCLUDES}
+  RestBridge.h
+  types.h)
+set(RESTBRIDGE_HEADERS
+  detail/RequestHandler.h
+  detail/RestZeqTranslator.h)
+set(RESTBRIDGE_SOURCES
+  ${COMMON_SOURCES}
+  RestBridge.cpp
+  detail/RequestHandler.cpp
+  detail/RestZeqTranslator.cpp)
 
-common_application(restBridge)
+set(RESTBRIDGE_LINK_LIBRARIES ${Boost_LIBRARIES} ${LUNCHBOX_LIBRARIES}
+  ${ZEQ_LIBRARIES} ${CPPNETLIB_LIBRARIES} pthread)
+
+common_library(RESTBridge)
