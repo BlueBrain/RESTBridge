@@ -3,13 +3,14 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#ifndef RESTCONNECTOR_REQUESTHANDLER_H
-#define RESTCONNECTOR_REQUESTHANDLER_H
+#ifndef RESTBRIDGE_REQUESTHANDLER_H
+#define RESTBRIDGE_REQUESTHANDLER_H
 
-#include <restconnector/types.h>
-#include <restconnector/detail/RestZeqTranslator.h>
+#include <restbridge/types.h>
+#include <restbridge/detail/RestZeqTranslator.h>
 
 #include <boost/network/protocol/http/server.hpp>
+#include <boost/scoped_ptr.hpp>
 #undef ECHO // On RedHat, ECHO is already defined and conflicts with the ECHO ZEq event
 
 namespace restbridge
@@ -87,4 +88,4 @@ private:
 
 }
 }
-#endif // RESTCONNECTOR_REQUESTHANDLER_H
+#endif // RESTBRIDGE_REQUESTHANDLER_H
