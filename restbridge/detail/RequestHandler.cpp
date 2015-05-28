@@ -9,7 +9,7 @@
 
 #include <zeq/hbp/vocabulary.h>
 
-#include <lunchbox/uri.h>
+#include <servus/uri.h>
 #include <lunchbox/log.h>
 
 namespace restbridge
@@ -19,8 +19,8 @@ namespace detail
 
 RequestHandler::RequestHandler( const std::string& publisherSchema,
                                 const std::string& subscriberSchema )
-    : subscriber_( new zeq::Subscriber( lunchbox::URI( subscriberSchema ) ) )
-    , publisher_( new zeq::Publisher( lunchbox::URI( publisherSchema ) ) )
+    : subscriber_( new zeq::Subscriber( servus::URI( subscriberSchema ) ) )
+    , publisher_( new zeq::Publisher( servus::URI( publisherSchema ) ) )
     , listening_( true )
     , listeningThread_( new boost::thread( boost::bind( &RequestHandler::listen_, this ) ) )
 {
