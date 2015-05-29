@@ -102,12 +102,12 @@ private:
     {
         zeqEventDescriptor() {}
 
-        zeqEventDescriptor( lunchbox::uint128_t eventType, std::string eventSchema  )
+        zeqEventDescriptor( zeq::uint128_t eventType, std::string eventSchema  )
             : eventType_( eventType )
             , eventSchema_( eventSchema )
         {}
 
-        lunchbox::uint128_t eventType_;
+        zeq::uint128_t eventType_;
         std::string eventSchema_;
     };
 
