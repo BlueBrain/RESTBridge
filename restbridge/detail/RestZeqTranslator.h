@@ -2,8 +2,8 @@
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  */
 
-#ifndef RESTCONNECTOR_RESTZEQTRANSLATOR_H
-#define RESTCONNECTOR_RESTZEQTRANSLATOR_H
+#ifndef RESTBRIDGE_RESTZEQTRANSLATOR_H
+#define RESTBRIDGE_RESTZEQTRANSLATOR_H
 
 #include <zeq/event.h>
 
@@ -123,4 +123,4 @@ private:
 }
 }
 
-#endif // RESTCONNECTOR_RESTZEQTRANSLATOR_H
+#endif // RESTBRIDGE_RESTZEQTRANSLATOR_H
