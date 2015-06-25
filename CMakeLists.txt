@@ -17,6 +17,8 @@ set(VERSION_ABI 1)
 set(RESTBRIDGE_DESCRIPTION "C++ REST to rendering engine command translator.")
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 option(CPP-NETLIB_BUILD_SHARED_LIBS "Build cpp-netlib as shared libraries." ON)
+option(CPP-NETLIB_BUILD_EXAMPLES "Build the cpp-netlib project examples." OFF)
+
 if(APPLE)
   # WAR otherwise system OpenSSL is preferred
   list(INSERT CMAKE_PREFIX_PATH 0 /opt/local)
