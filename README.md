@@ -1,11 +1,24 @@
-# RestConnector
-Exposes a REST interface for C++ applications
+RESTBridge
+============
 
-## using Buildyard:
+# Introduction
 
-```
-  git clone https://github.com/Eyescale/Buildyard.git
-  cd Buildyard
-  git clone https://github.com/BlueBrain/config.git config.bluebrain
-  make RestConnector
-```
+Welcome to RESTBridge, a C++ library that provides a simple way to expose a
+REST interface in a C++ application.
+
+Please file a [Bug Report](https://github.com/BlueBrain/RESTBridge/issues)
+if you find any other issue with this release.
+
+# Installation
+
+## Build from source
+
+~~~
+    git clone https://github.com/BlueBrain/RESTBridge.git
+    cd RESTBridge
+    mkdir Build
+    cd Build
+    cmake ..
+    make
+~~~
+

@@ -3,7 +3,6 @@
  */
 
 #include <restbridge/RestBridge.h>
-#include <lunchbox/log.h>
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
@@ -14,8 +13,6 @@ namespace po = boost::program_options;
 
 int main( int argc, char * argv[] )
 {
-    lunchbox::Log::instance().level = lunchbox::LOG_ALL;
-
     // Declare the supported options.
     po::options_description description("Usage:");
     description.add_options()
@@ -31,7 +28,7 @@ int main( int argc, char * argv[] )
 
     if( !vm.count( PARAM_HOST ) || !vm.count( PARAM_PORT ) || !vm.count( PARAM_SCHEMA ))
     {
-        LBERROR << description << std::endl;
+        std::cerr << description << std::endl;
         return 1;
     }
 
@@ -45,13 +42,13 @@ int main( int argc, char * argv[] )
     }
     catch( const boost::bad_lexical_cast &e )
     {
-        LBERROR << vm[ PARAM_PORT ].as< std::string >() << " is an invalid port number: " <<
+        std::cerr << vm[ PARAM_PORT ].as< std::string >() << " is an invalid port number: " <<
             e.what() << std::endl;
         return 1;
     }
     catch ( std::exception &e )
     {
-        LBERROR << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
         return 1;
     }
     return 0;

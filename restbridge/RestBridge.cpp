@@ -5,11 +5,11 @@
 #include "RestBridge.h"
 #include "detail/RequestHandler.h"
 
-#include <lunchbox/debug.h>
-#include <lunchbox/log.h>
-#include <lunchbox/monitor.h>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
+#include <condition_variable>
+#include <mutex>
+#include <atomic>
 
 namespace restbridge
 {
@@ -41,38 +41,56 @@ public:
         }
     }
 
+    bool waitForRunningState(const uint16_t milliseconds)
+    {
+        sleep(milliseconds/1000.f);
+        return serverRunning_;
+    }
+
     void run( const std::string& schema )
     {
-        const std::string publisherSchema = schema + PUBLISHER_SCHEMA_SUFFIX;
-        const std::string subscriberSchema = schema + SUBSCRIBER_SCHEMA_SUFFIX;
-        RequestHandler handler( publisherSchema, subscriberSchema );
+        { // scope is for automic unlocking of the mutex_ when the http server is stopped
+            std::unique_lock<std::mutex> lock(mutex_);
+            const std::string publisherSchema = schema + PUBLISHER_SCHEMA_SUFFIX;
+            const std::string subscriberSchema = schema + SUBSCRIBER_SCHEMA_SUFFIX;
+            // Create request handler
+            RequestHandler handler( publisherSchema, subscriberSchema );
 
-        server::options options( handler );
-        std::stringstream port;
-        port << port_;
-        httpServer_.reset( new server( options.address( hostname_ ).port( port.str( ))));
+            server::options options( handler );
+            std::stringstream port;
+            port << port_;
+            // Create http server
+            httpServer_.reset( new server( options.address( hostname_ ).port( port.str( ))));
 
-        LBINFO << "HTTP Server runnning on " << hostname_ << ":" << port_ << std::endl;
-        LBINFO << "ZeroEq Publisher Schema : " << publisherSchema << std::endl;
-        LBINFO << "ZeroEq Subscriber Schema: " << subscriberSchema << std::endl;
-        serverRunning_ = true;
-        httpServer_->run();
+            std::cout << "HTTP Server runnning on " << hostname_ << ":" << port_ << std::endl;
+            std::cout << "ZeroEq Publisher Schema : " << publisherSchema << std::endl;
+            std::cout << "ZeroEq Subscriber Schema: " << subscriberSchema << std::endl;
+            serverRunning_ = true;
+            // Start processing http requests
+            httpServer_->run();
+        }
     }
 
     void stop()
     {
         if( !thread_ || !serverRunning_ )
-            LBTHROW( std::runtime_error( "HTTP server is not running, cannot stop it" ));
+            throw( std::runtime_error( "HTTP server is not running, cannot stop it" ));
+        // Stop http server hosted by thread_
         httpServer_->stop();
+
+        // Wait until the http server is stopped
+        std::unique_lock<std::mutex> lock(mutex_);
+        // Stop listening thread
         thread_->join();
         serverRunning_ = false;
-        LBINFO << "HTTP Server on " << hostname_ << ":" << port_
-               << " is stopped" << std::endl;
+        std::cout << "HTTP Server on " << hostname_ << ":" << port_
+                  << " is stopped" << std::endl;
     }
 
     boost::scoped_ptr< boost::thread > thread_;
     boost::scoped_ptr< server > httpServer_;
-    lunchbox::Monitor< bool > serverRunning_;
+    std::mutex mutex_;
+    std::atomic<bool> serverRunning_;
     std::string hostname_;
     uint16_t port_;
 };
@@ -91,11 +109,11 @@ RestBridge::~RestBridge()
 void RestBridge::run( const std::string& schema )
 {
     if( _impl->thread_ )
-        LBTHROW( std::runtime_error( "HTTP server is already running" ));
+        throw( std::runtime_error( "HTTP server is already running" ));
     _impl->thread_.reset( new boost::thread(
         boost::bind( &detail::RestBridge::run, _impl, schema )));
-    if( ! _impl->serverRunning_.timedWaitEQ( true, 2000 ))
-        LBTHROW( std::runtime_error( "HTTP server could not be started" ));
+    if( !_impl->waitForRunningState(2000) )
+        throw( std::runtime_error( "HTTP server could not be started" ));
 }
 
 void RestBridge::stop()
