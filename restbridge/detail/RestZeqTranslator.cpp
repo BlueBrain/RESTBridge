@@ -10,7 +10,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <lunchbox/log.h>
 
 #include <iostream>
 
@@ -40,7 +39,7 @@ zeq::Event RestZeqTranslator::translate ( const std::string& request, const std:
 
     VocabularyMap::const_iterator it = vocabularySubscribed_.find( command );
     if( it == vocabularySubscribed_.end() )
-        LBTHROW(CommandNotFound( command ) );
+        throw(CommandNotFound( command ) );
 
     return zeq::vocabulary::serializeJSON( it->second.eventType_, body );
 }
@@ -51,7 +50,7 @@ zeq::Event RestZeqTranslator::translate( const std::string& request ) const
 
     VocabularyMap::const_iterator it = vocabularyPublished_.find( command );
     if( it == vocabularyPublished_.end() )
-        LBTHROW(CommandNotFound( command ) );
+        throw(CommandNotFound( command ) );
 
     return zeq::vocabulary::serializeRequest( it->second.eventType_ );
 }
@@ -59,16 +58,16 @@ zeq::Event RestZeqTranslator::translate( const std::string& request ) const
 std::string RestZeqTranslator::getCommand( const std::string& request ) const
 {
     if( request.empty() )
-        LBTHROW(InvalidRequest("Empty request") );
+        throw(InvalidRequest("Empty request") );
 
-    lunchbox::Strings dataParts;
+    servus::Strings dataParts;
 
     boost::split( dataParts, request, boost::is_any_of( "/" ) );
-    lunchbox::Strings commandAndPayload;
+    servus::Strings commandAndPayload;
     boost::split( commandAndPayload, dataParts.back(), boost::is_any_of( "?" ) );
 
     if( ( commandAndPayload.empty() ) || commandAndPayload.front().empty() )
-        LBTHROW(InvalidRequest("Empty command string") );
+        throw(InvalidRequest("Empty command string") );
 
     //We insure that REST command is lowercase because urls are not case sensitive
     std::transform( commandAndPayload.front().begin(), commandAndPayload.front().end(),

@@ -42,7 +42,7 @@ public:
      * @param subscriberSchema Schema on which zeq events will be received
      */
     RequestHandler( const std::string& publisherSchema,
-                    const std::string& subscriberSchema );
+                    const std::string& subscriberSchema);
 
     ~RequestHandler();
 

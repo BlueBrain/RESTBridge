@@ -14,7 +14,7 @@ set(VERSION_MINOR "1")
 set(VERSION_PATCH "0")
 set(VERSION_ABI 1)
 
-set(RESTBRIDGE_DESCRIPTION "C++ REST to rendering engine command translator.")
+set(RESTBRIDGE_DESCRIPTION "A library that provides an simple way to expose a REST interface in a C++ application")
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 option(CPP-NETLIB_BUILD_SHARED_LIBS "Build cpp-netlib as shared libraries." ON)
 option(CPP-NETLIB_BUILD_EXAMPLES "Build the cpp-netlib project examples." OFF)
@@ -33,3 +33,6 @@ add_subdirectory(tests)
 
 include(CPackConfig)
 include(DoxygenRule)
+
+SET(DOXYGEN_MAINPAGE_MD README.md)
+SET(DOXYGEN_EXTRA_INPUT ${PROJECT_SOURCE_DIR}/README.md)
