@@ -4,13 +4,12 @@
  */
 
 #include "RequestHandler.h"
-
+#include "restbridge/log.h"
 #include <zeq/zeq.h>
 
 #include <zeq/hbp/vocabulary.h>
 
 #include <servus/uri.h>
-#include <lunchbox/log.h>
 
 namespace restbridge
 {
@@ -107,7 +106,6 @@ void RequestHandler::onStartupHeartbeatEvent_()
 
 void RequestHandler::onHeartbeatEvent_()
 {
-    LBVERB << "Heartbeat event received." << std::endl;
 }
 
 void RequestHandler::onVocabularyEvent_( const zeq::Event& event )
@@ -142,7 +140,7 @@ void RequestHandler::addEventDescriptor_( const zeq::EventDescriptor& eventDescr
 
 void RequestHandler::log( server::string_type const &info )
 {
-    LBERROR << info << std::endl;
+    RBERROR << info << std::endl;
 }
 
 }
