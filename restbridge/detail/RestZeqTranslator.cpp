@@ -34,7 +34,8 @@ RestZeqTranslator::~RestZeqTranslator()
 {
 }
 
-zeq::Event RestZeqTranslator::translate ( const std::string& request, const std::string& body ) const
+zeq::Event RestZeqTranslator::translate ( const std::string& request,
+                                          const std::string& body ) const
 {
     const std::string& command = getCommand( request );
 
@@ -105,8 +106,11 @@ std::string RestZeqTranslator::getVocabulary() const
     for ( VocabularyMap::const_iterator it = vocabularySubscribed_.begin();
           it != vocabularySubscribed_.end(); ++it )
     {
-        subscribedVocabulary.put( JSON_COMMAND, it->first );
-        subscribedVocabulary.put( JSON_SCHEMA, it->second.eventSchema_ );
+        boost::property_tree::ptree event;
+        event.add( JSON_COMMAND, it->first );
+        event.add( JSON_SCHEMA, it->second.eventSchema_ );
+        subscribedVocabulary.add_child( it->second.eventType_.getString(),
+                                        event );
     }
 
     vocabulary.add_child( JSON_SUBSCRIBER, subscribedVocabulary );
@@ -115,8 +119,11 @@ std::string RestZeqTranslator::getVocabulary() const
     for ( VocabularyMap::const_iterator it = vocabularyPublished_.begin();
           it != vocabularyPublished_.end(); ++it )
     {
-        publishedVocabulary.put( JSON_COMMAND, it->first );
-        publishedVocabulary.put( JSON_SCHEMA, it->second.eventSchema_ );
+        boost::property_tree::ptree event;
+        event.add( JSON_COMMAND, it->first );
+        event.add( JSON_SCHEMA, it->second.eventSchema_ );
+        publishedVocabulary.add_child( it->second.eventType_.getString(),
+                                       event );
     }
 
     vocabulary.add_child( JSON_PUBLISHED, publishedVocabulary );
