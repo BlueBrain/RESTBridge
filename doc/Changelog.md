@@ -17,6 +17,8 @@ if you find any other issue with this release.
 
 * [23](https://github.com/BlueBrain/RESTBridge/pull/23):
 Fix vocabulary to return all registered events, not only one
+* [26](https://github.com/BlueBrain/RESTBridge/pull/26):
+RESTBridge can parse command line parameters
 
 ## RESTBridge 0.1 (09-Jul-2015) {#version010}
 

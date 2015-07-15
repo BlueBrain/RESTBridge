@@ -29,15 +29,24 @@ public:
      */
     RestBridge( const std::string& hostname, const uint16_t port );
 
+    /**
+     * This constructor extract the hostname, the port and the schema from the
+     * command line arguments char array.
+     * The format is: --restbridge-zeq schema://hostname:port
+     * @param argc the command line argument count.
+     * @param argv the command line argument values.
+     */
+    RestBridge( const int argc, const char** argv );
+
     ~RestBridge();
 
     /**
      * Listening to HTTP requests and forwarding them to the handler in
      * a dedicated thread.
-     * @param schema Schema prefix used by zeq publisher and subscriber
+     * @param schema Optional schema prefix used by zeq publisher and subscriber
      * @throw std::runtime_error if HTTP server is already running or could not be started
      */
-    void run( const std::string& schema );
+    void run( const std::string& schema = "" );
 
     /**
      * Stop the HTTP server thread.

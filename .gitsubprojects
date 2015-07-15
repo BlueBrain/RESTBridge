@@ -1,5 +1,4 @@
 # -*- mode: cmake -*-
-git_subproject(Lunchbox https://github.com/Eyescale/Lunchbox.git a87ac95)
 git_subproject(zeq https://github.com/HBPVis/zeq.git 00d255d)
 git_subproject(FlatBuffers https://github.com/Bluebrain/flatbuffers.git b5721cf)
 git_subproject(cppnetlib https://github.com/cpp-netlib/cpp-netlib.git 0.11-devel)
