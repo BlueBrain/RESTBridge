@@ -41,7 +41,7 @@ public:
             {
                 try
                 {
-                     const servus::URI uri( std::string( argv[i+1] ));
+                     const servus::URI uri( (std::string( argv[i+1] )));
                      if( uri.getScheme().empty() )
                          RBTHROW( std::runtime_error( "Empty zeq schema" ));
 
