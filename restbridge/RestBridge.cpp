@@ -6,6 +6,8 @@
 #include "restbridge/log.h"
 #include "detail/RequestHandler.h"
 
+#include <servus/uri.h>
+
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <condition_variable>
@@ -30,6 +32,37 @@ public:
     {
     }
 
+    RestBridge( const int argc, const char** argv )
+        : serverRunning_( false )
+    {
+        for( int i = 0; i < argc; ++i  )
+        {
+            if( std::string( argv[i] ) == "--restbridge-zeq" )
+            {
+                try
+                {
+                     const servus::URI uri( std::string( argv[i+1] ));
+                     if( uri.getScheme().empty() )
+                         RBTHROW( std::runtime_error( "Empty zeq schema" ));
+
+                     if( uri.getHost().empty() )
+                         RBTHROW( std::runtime_error( "Empty host" ));
+
+                     if( !uri.getPort())
+                         RBTHROW( std::runtime_error( "Port is zero" ));
+
+                     schema_ = uri.getScheme();
+                     hostname_ = uri.getHost();
+                     port_ = uri.getPort();
+                }
+                catch( ... )
+                {
+                    RBTHROW( std::runtime_error( "Servus uri parsing error" ));
+                }
+            }
+        }
+    }
+
     ~RestBridge()
     {
         if( serverRunning_ )
@@ -50,9 +83,11 @@ public:
 
     void run( const std::string& schema )
     {
+        if( !schema.empty() )
+            schema_ = schema;
         std::unique_lock<std::mutex> lock(mutex_);
-        const std::string publisherSchema = schema + PUBLISHER_SCHEMA_SUFFIX;
-        const std::string subscriberSchema = schema + SUBSCRIBER_SCHEMA_SUFFIX;
+        const std::string publisherSchema = schema_ + PUBLISHER_SCHEMA_SUFFIX;
+        const std::string subscriberSchema = schema_ + SUBSCRIBER_SCHEMA_SUFFIX;
         // Create request handler
         RequestHandler handler( publisherSchema, subscriberSchema );
 
@@ -92,11 +127,17 @@ public:
     std::atomic<bool> serverRunning_;
     std::string hostname_;
     uint16_t port_;
+    std::string schema_;
 };
 }
 
 RestBridge::RestBridge( const std::string& hostname, const uint16_t port )
     : _impl( new detail::RestBridge( hostname, port ))
+{
+}
+
+RestBridge::RestBridge( const int argc, const char** argv )
+    : _impl( new detail::RestBridge( argc, argv ))
 {
 }
 

@@ -17,6 +17,54 @@ BOOST_AUTO_TEST_CASE( test_construction )
     BOOST_CHECK_NO_THROW( restbridge::RestBridge( "localhost", 12345 ));
 }
 
+BOOST_AUTO_TEST_CASE( test_construction_argc_argv )
+{
+    const char* argv[] = { "--chocolate", "is-good",
+                           "--something-different...", "is-not-good",
+                           "--restbridge-zeq", "zeq01://localhost:6666",
+                           "--(some-well-known-OS)8", "is-not-really-chocolate" };
+    const int argc = 8;
+    BOOST_CHECK_NO_THROW( restbridge::RestBridge( argc, argv ));
+}
+
+BOOST_AUTO_TEST_CASE( test_construction_argc_argv_invalid_schema )
+{
+    const char* argv[] = { "--chocolate", "is-good",
+                           "--restbridge-zeq", "://localhost:6666",
+                           "--something-different...", "is-not-good",
+                           "--(some-well-known-OS)8", "is-not-really-chocolate" };
+    const int argc = 8;
+    BOOST_CHECK_THROW( restbridge::RestBridge( argc, argv ), std::runtime_error );
+}
+
+BOOST_AUTO_TEST_CASE( test_construction_argc_argv_invalid_port )
+{
+    const char* argv[] = { "--(some-well-known-OS)8", "is ??",
+                            "--restbridge-zeq", "zeq01://localhost:" };
+    const int argc = 4;
+    BOOST_CHECK_THROW( restbridge::RestBridge( argc, argv ), std::runtime_error );
+}
+
+BOOST_AUTO_TEST_CASE( test_construction_argc_argv_invalid_hostname )
+{
+    const char* argv[] = { "--compleeeete", "#$%&",
+                            "--restbridge-zeq", "zeq01://:42" };
+    const int argc = 4;
+    BOOST_CHECK_THROW( restbridge::RestBridge( argc, argv ), std::runtime_error );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_argc_argv_run )
+{
+    const char* argv[] = { "--chocolate", "is-good",
+                           "--something-different...", "is-not-good",
+                           "--(some-well-known-OS)8", "is-not-really-chocolate",
+                           "--restbridge-zeq", "zeq02://localhost:6666" };
+    const int argc = 8;
+    restbridge::RestBridge bridge( argc, argv );
+    BOOST_CHECK_NO_THROW( bridge.run());
+}
+
 BOOST_AUTO_TEST_CASE( test_invalid_run )
 {
     const unsigned short port =  dis(gen) + 1024;
