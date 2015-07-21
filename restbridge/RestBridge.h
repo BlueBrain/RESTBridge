@@ -8,6 +8,7 @@
 #include <restbridge/types.h>
 #include <boost/noncopyable.hpp>
 #include <string>
+#include <cstdint>
 
 namespace restbridge
 {
