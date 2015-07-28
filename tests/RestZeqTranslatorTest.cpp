@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE( test_EventSUBSCRIBED )
 
     std::vector< float > matrixData = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
                                         0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-    const std::string& bodyJSON = { "{\"matrix\": \[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}" } ;
+    const std::string& bodyJSON = { "{\"matrix\": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}" } ;
     const std::string commandString = "CAMERA";
 
     const zeq::Event& zeqEvent = restZeqTranslator.translate( commandString, bodyJSON );
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( test_unknownEvent )
         restZeqTranslator.translate( commandString );
         test = true;
     }
-    catch( const restbridge::detail::RestZeqTranslator::RestZeqTranslatorException& e )
+    catch( const restbridge::detail::RestZeqTranslator::RestZeqTranslatorException& )
     {
         test = false;
     }

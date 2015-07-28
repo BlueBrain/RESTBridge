@@ -11,7 +11,9 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <condition_variable>
+#include <chrono>
 #include <mutex>
+#include <thread>
 #include <atomic>
 
 namespace restbridge
@@ -77,7 +79,7 @@ public:
 
     bool waitForRunningState(const uint16_t milliseconds)
     {
-        sleep(milliseconds/1000.f);
+        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
         return serverRunning_;
     }
 
