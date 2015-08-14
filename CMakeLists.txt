@@ -28,9 +28,9 @@ include(Common)
 
 common_package(Boost REQUIRED COMPONENTS unit_test_framework program_options
                                          system thread)
-common_package(cppnetlib SYSTEM  REQUIRED)
+common_package(cppnetlib SYSTEM REQUIRED)
 common_package(FlatBuffers REQUIRED)
-common_package(zeq REQUIRED )
+common_package(zeq REQUIRED)
 common_package_post()
 
 add_subdirectory(restbridge)

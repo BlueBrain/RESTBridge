@@ -1,4 +1,4 @@
 # -*- mode: cmake -*-
-git_subproject(zeq https://github.com/HBPVis/zeq.git 00d255d)
-git_subproject(FlatBuffers https://github.com/Bluebrain/flatbuffers.git b5721cf)
-git_subproject(cppnetlib https://github.com/cpp-netlib/cpp-netlib.git 0.11-devel)
+git_subproject(zeq https://github.com/HBPVis/zeq.git 7ccd806)
+git_subproject(FlatBuffers https://github.com/Bluebrain/flatbuffers.git ae9b391)
+git_subproject(cppnetlib https://github.com/cpp-netlib/cpp-netlib.git d3e884f)
