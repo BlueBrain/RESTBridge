@@ -27,7 +27,7 @@ public:
     class RestZeqTranslatorException : public std::runtime_error
     {
     public:
-        RestZeqTranslatorException( const std::string& message)
+        explicit RestZeqTranslatorException( const std::string& message )
             : std::runtime_error( message ) {}
 
         virtual ~RestZeqTranslatorException() = 0;
@@ -35,13 +35,13 @@ public:
     class CommandNotFound : public RestZeqTranslatorException
     {
     public:
-        CommandNotFound( const std::string& message)
+        explicit CommandNotFound( const std::string& message )
             : RestZeqTranslatorException( message ) {}
     };
     class InvalidRequest : public RestZeqTranslatorException
     {
     public:
-        InvalidRequest( const std::string& message)
+        explicit InvalidRequest( const std::string& message )
             : RestZeqTranslatorException( message ) {}
     };
 
