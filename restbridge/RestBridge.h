@@ -6,7 +6,6 @@
 #define RESTBRIDGE_RESTBRIDGE_H
 
 #include <restbridge/types.h>
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <cstdint>
 
@@ -20,7 +19,7 @@ namespace detail { class RestBridge; }
  * in a dedicated thread, according to a given hostname and port.
  * HTTP requests are forwarded to an implicitely registered handler.
  */
-class RestBridge : public boost::noncopyable
+class RestBridge
 {
 public:
     /**
@@ -56,6 +55,8 @@ public:
     void stop();
 
 private:
+    RestBridge( const RestBridge& ) = delete;
+    RestBridge& operator=( const RestBridge& ) = delete;
     detail::RestBridge* const _impl;
 };
 
