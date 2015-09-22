@@ -46,8 +46,7 @@ public:
         : serverRunning_( false )
         , hostname_( hostname )
         , port_( port )
-    {
-    }
+    {}
 
     RestBridge( const int argc, const char** argv )
         : serverRunning_( false )
@@ -56,11 +55,14 @@ public:
         {
             if( std::string( argv[i] ) == "--restbridge-zeq" )
             {
+                if( i == argc )
+                    RBTHROW( std::runtime_error( "Missing ZeroEQ schema" ));
+
                 try
                 {
-                     const servus::URI uri( (std::string( argv[i+1] )));
+                     const servus::URI uri( std::string( argv[i+1] ));
                      if( uri.getScheme().empty() )
-                         RBTHROW( std::runtime_error( "Empty zeq schema" ));
+                         RBTHROW( std::runtime_error( "Empty ZeroEQ schema" ));
 
                      if( uri.getHost().empty() )
                          RBTHROW( std::runtime_error( "Empty host" ));
@@ -74,7 +76,7 @@ public:
                 }
                 catch( ... )
                 {
-                    RBTHROW( std::runtime_error( "Servus uri parsing error" ));
+                    RBTHROW( std::runtime_error( "URI parse error" ));
                 }
             }
         }
