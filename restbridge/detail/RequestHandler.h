@@ -23,10 +23,13 @@
 
 #include <restbridge/types.h>
 #include <restbridge/detail/RestZeqTranslator.h>
-
+#include <zeq/publisher.h>
+#include <zeq/subscriber.h>
 #include <boost/network/protocol/http/server.hpp>
-#include <boost/scoped_ptr.hpp>
-#undef ECHO // On RedHat, ECHO is already defined and conflicts with the ECHO ZEq event
+#include <mutex>
+#ifdef ECHO
+#  undef ECHO // Global namespace pollution conflicts with the ECHO ZEq event
+#endif
 
 namespace restbridge
 {
@@ -34,13 +37,7 @@ namespace detail
 {
 
 class RequestHandler;
-typedef boost::network::http::server<RequestHandler> server;
-
-static const std::string REST_VERB_GET = "GET";
-static const std::string REST_VERB_PUT = "PUT";
-static const std::string REST_VERB_DELETE = "DELETE";
-static const std::string REST_VERB_PATCH = "PATCH";
-static const std::string REST_VERB_POST = "POST";
+typedef boost::network::http::server< RequestHandler > Server;
 
 /**
  * The RequestHandler class handles incoming HTTP requests and
@@ -67,14 +64,15 @@ public:
      * @param request Incoming HTTP request
      * @param response Response to be sent back
      */
-    void operator() ( const server::request &request, server::response &response );
+    void operator() ( const Server::request& request,
+                      Server::response& response );
 
     /**
      * Callback method used for logging internal errors raised by the underlying
      * cppnetlib library.
      * @param info String containing the error message
      */
-    void log( server::string_type const &info );
+    void log( const Server::string_type& info );
 
 private:
     void onStartupHeartbeatEvent_();
@@ -87,16 +85,16 @@ private:
     void processGET_( const zeq::Event& event );
     void listen_();
 
-    boost::scoped_ptr< zeq::Subscriber > subscriber_;
-    boost::scoped_ptr< zeq::Publisher > publisher_;
+    zeq::Subscriber subscriber_;
+    zeq::Publisher publisher_;
 
-    boost::mutex requestLock_;
+    std::mutex requestLock_;
 
     bool listening_;
-    boost::scoped_ptr< boost::thread > listeningThread_;
+    boost::thread listeningThread_;
 
-    server::request request_;
-    server::response response_;
+    Server::request request_;
+    Server::response response_;
 
     RestZeqTranslator restZeqTranslator_;
 };

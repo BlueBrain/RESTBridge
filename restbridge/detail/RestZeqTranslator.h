@@ -99,7 +99,7 @@ public:
     void addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor );
 
     /**
-     * Retreive the REST command from the http request.
+     * Retrieve the REST command from the http request.
      * @param request A string containing the http request
      * @return A string containing the REST command
      */

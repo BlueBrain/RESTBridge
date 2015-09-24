@@ -17,9 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 # All rights reserved. Do not distribute without further notice.
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-
 set(RESTBRIDGESERVER_SOURCES RESTBridge.cpp)
-set(RESTBRIDGESERVER_LINK_LIBRARIES ${Boost_PROGRAM_OPTIONS_LIBRARY} RESTBridge)
-
+set(RESTBRIDGESERVER_LINK_LIBRARIES ${Boost_PROGRAM_OPTIONS_LIBRARY} RESTBridge
+  zeq)
 common_application(restBridgeServer)

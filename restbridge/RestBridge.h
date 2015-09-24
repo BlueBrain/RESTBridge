@@ -1,5 +1,6 @@
 /* Copyright (c) 2014-2015, Human Brain Project
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of RESTBridge <https://github.com/BlueBrain/RESTBridge>
  *
@@ -38,41 +39,43 @@ class RestBridge
 {
 public:
     /**
-     * Default constructor.
-     * @param hostname Hostname or IP address
-     * @param port Listening port
+     * Create a new REST bridge when requested.
+     *
+     * The creation and parameters depend on the following command line
+     * parameters:
+     * * --rest [host][:port]: Enable the REST bridge. Optional parameters
+     *   configure the web server, running by default on :4020
+     *
+     * @param argc Argument count
+     * @param argv Argument list
+     * @return a configured and running REST bridge, or an invalid pointer.
+     * @throw std::runtime_error if the HTTP server could not be started.
      */
-    RestBridge( const std::string& hostname, const uint16_t port );
+    static std::unique_ptr< RestBridge > parse( int argc, char* argv[] );
 
-    /**
-     * This constructor extract the hostname, the port and the schema from the
-     * command line arguments char array.
-     * The format is: --restbridge-zeq schema://hostname:port
-     * @param argc the command line argument count.
-     * @param argv the command line argument values.
-     */
-    RestBridge( const int argc, const char** argv );
+    /** Always create a new RESTBridge. @sa create() for parameters. */
+    static std::unique_ptr< RestBridge > create( int argc, char* argv[] );
 
     ~RestBridge();
 
-    /**
-     * Listening to HTTP requests and forwarding them to the handler in
-     * a dedicated thread.
-     * @param schema Optional schema prefix used by zeq publisher and subscriber
-     * @throw std::runtime_error if HTTP server is already running or could not be started
-     */
-    void run( const std::string& schema = "" );
+    /** @return a string describing the parsed command line parameters. */
+    static std::string getHelp();
 
-    /**
-     * Stop the HTTP server thread.
-     * @throw std::runtime_error if HTTP server is not running
-     */
-    void stop();
+    /** @return the URI to which the application should publish. */
+    zeq::URI getPublisherURI() const;
+
+    /** @return the URI to which the application should subscribe. */
+    zeq::URI getSubscriberURI() const;
+
+    /** @return true if the rest bridge is running. */
+    bool isRunning() const;
 
 private:
     RestBridge( const RestBridge& ) = delete;
     RestBridge& operator=( const RestBridge& ) = delete;
     detail::RestBridge* const _impl;
+
+    RestBridge( int argc, char* argv[] );
 };
 
 }
