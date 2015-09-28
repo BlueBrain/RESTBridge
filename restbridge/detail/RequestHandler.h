@@ -47,15 +47,12 @@ typedef boost::network::http::server< RequestHandler > Server;
 class RequestHandler
 {
 public:
-
     /**
      * Constructor
      * @param publisherSchema Schema on which zeq events will be published
      * @param subscriberSchema Schema on which zeq events will be received
      */
-    RequestHandler( const std::string& publisherSchema,
-                    const std::string& subscriberSchema );
-
+    RequestHandler( zeq::URI& publisherURI, const zeq::URI& subscriberURI );
     ~RequestHandler();
 
     /**

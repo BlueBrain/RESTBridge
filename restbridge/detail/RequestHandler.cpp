@@ -39,10 +39,10 @@ static const std::string REST_VERB_POST = "POST";
 
 namespace detail
 {
-
-RequestHandler::RequestHandler( const std::string& pub, const std::string& sub )
-    : subscriber_( servus::URI( sub + "://?subscribeSelf=true" ))
-    , publisher_( servus::URI( pub + "://" ))
+RequestHandler::RequestHandler( zeq::URI& publisherURI,
+                                const zeq::URI& subscriberURI )
+    : subscriber_( subscriberURI )
+    , publisher_( publisherURI )
     , listening_( true )
     , listeningThread_( boost::bind( &RequestHandler::listen_, this ))
 {
