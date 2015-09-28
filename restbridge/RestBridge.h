@@ -46,11 +46,16 @@ public:
      * * --rest [host][:port]: Enable the REST bridge. Optional parameters
      *   configure the web server, running by default on :4020
      *
+     * @param publisher Existing publisher of the application
      * @param argc Argument count
      * @param argv Argument list
      * @return a configured and running REST bridge, or an invalid pointer.
      * @throw std::runtime_error if the HTTP server could not be started.
      */
+    static std::unique_ptr< RestBridge > parse( const zeq::Publisher& publisher,
+                                                int argc, char* argv[] );
+
+    /** @sa parse() above. */
     static std::unique_ptr< RestBridge > parse( int argc, char* argv[] );
 
     /** Always create a new RESTBridge. @sa create() for parameters. */
@@ -75,7 +80,7 @@ private:
     RestBridge& operator=( const RestBridge& ) = delete;
     detail::RestBridge* const _impl;
 
-    RestBridge( int argc, char* argv[] );
+    RestBridge( int argc, char* argv[], const zeq::URI& );
 };
 
 }

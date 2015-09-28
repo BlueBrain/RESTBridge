@@ -47,15 +47,12 @@ typedef boost::network::http::server< RequestHandler > Server;
 class RequestHandler
 {
 public:
-
     /**
      * Constructor
      * @param publisherSchema Schema on which zeq events will be published
      * @param subscriberSchema Schema on which zeq events will be received
      */
-    RequestHandler( const std::string& publisherSchema,
-                    const std::string& subscriberSchema );
-
+    RequestHandler( zeq::URI& publisherURI, const zeq::URI& subscriberURI );
     ~RequestHandler();
 
     /**
@@ -78,23 +75,21 @@ private:
     void onStartupHeartbeatEvent_();
     void onHeartbeatEvent_();
     void onVocabularyEvent_( const zeq::Event& event );
-    void onEvent_( const zeq::Event& event );
+    void onEvent_( const zeq::Event& event, const zeq::uint128_t& expected,
+                   Server::response& response );
     void addEventDescriptor_( const zeq::EventDescriptor& eventDescriptor );
 
-    void processPUT_( const zeq::Event& event );
-    void processGET_( const zeq::Event& event );
+    Server::response processPUT_( const zeq::Event& event );
+    Server::response processGET_( const zeq::Event& event );
     void listen_();
 
-    zeq::Subscriber subscriber_;
-    zeq::Publisher publisher_;
+    zeq::Subscriber _subscriber;
+    zeq::Publisher _publisher;
 
     std::mutex requestLock_;
 
     bool listening_;
     boost::thread listeningThread_;
-
-    Server::request request_;
-    Server::response response_;
 
     RestZeqTranslator restZeqTranslator_;
 };

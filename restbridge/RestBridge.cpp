@@ -38,8 +38,6 @@ namespace
 {
 static const std::string DEFAULT_SCHEME = "hbp";
 static const uint16_t DEFAULT_PORT = 4020;
-static const std::string PUBLISHER_SCHEME_SUFFIX = "req";
-static const std::string SUBSCRIBER_SCHEME_SUFFIX = "rep";
 }
 
 namespace detail
@@ -47,37 +45,44 @@ namespace detail
 class RestBridge
 {
 public:
-    RestBridge( const int argc, char* argv[] )
+    RestBridge( const int argc, char* argv[], const zeq::URI& uri )
+        : pubURI( uri )
     {
+        subURI.setScheme( pubURI.getScheme( ));
         for( int i = 0; i < argc; ++i  )
         {
             if( std::string( argv[i] ) == "--rest" &&
                 i < argc && argv[i+1] && argv[i+1][0] != '-' )
             {
-                uri = servus::URI( std::string( argv[i+1] ));
+                httpURI = servus::URI( std::string( argv[i+1] ));
+                if( pubURI == zeq::URI( ))
+                    pubURI.setScheme( httpURI.getScheme( ));
+                if( subURI.getScheme().empty( ))
+                    subURI.setScheme( httpURI.getScheme( ));
             }
         }
-
-        if( uri.getScheme().empty( ))
-            uri.setScheme( DEFAULT_SCHEME );
-        if( uri.getPort() == 0 )
-            uri.setPort( DEFAULT_PORT );
-        if( uri.getHost().empty( ))
-            uri.setHost( "localhost" );
+        if( pubURI.getScheme().empty( ))
+            pubURI.setScheme( DEFAULT_SCHEME );
+        if( subURI.getScheme().empty( ))
+            subURI.setScheme( DEFAULT_SCHEME );
+        if( httpURI.getPort() == 0 )
+            httpURI.setPort( DEFAULT_PORT );
+        if( httpURI.getHost().empty( ))
+            httpURI.setHost( "localhost" );
 
         // Request handler
-        const std::string pubScheme = uri.getScheme() + PUBLISHER_SCHEME_SUFFIX;
-        const std::string subScheme = uri.getScheme() +SUBSCRIBER_SCHEME_SUFFIX;
-        _handler.reset( new RequestHandler( pubScheme, subScheme ));
+        //   pub and sub are from the app POV, so need to be swapped here
+        _handler.reset( new RequestHandler( subURI, pubURI ));
 
         // http server
         Server::options options( *_handler );
-        _server.reset( new Server( options.address( uri.getHost( )).
-                                   port( std::to_string( int( uri.getPort( )))).
+        _server.reset( new Server( options.address( httpURI.getHost( )).
+                               port( std::to_string( int( httpURI.getPort( )))).
                                    reuse_address( true )));
 
-        RBDEBUG << "RestBridge running on http://" << uri.getHost() << ":"
-                << uri.getPort() << std::endl;
+        RBDEBUG << "RestBridge running on http://" << httpURI.getHost() << ":"
+                << httpURI.getPort() << " with ZeroEQ published on " << subURI
+                << " subscribed to " << pubURI << std::endl;
 
         thread.reset( new boost::thread(
                           boost::bind( &detail::Server::run, _server.get( ))));
@@ -92,7 +97,9 @@ public:
         RBDEBUG << "HTTP Server stopped" << std::endl;
     }
 
-    servus::URI uri;
+    servus::URI httpURI;
+    servus::URI pubURI;
+    servus::URI subURI;
     std::unique_ptr< boost::thread > thread;
 
 private:
@@ -101,17 +108,39 @@ private:
 };
 }
 
-std::unique_ptr< RestBridge > RestBridge::parse( const int argc, char* argv[] )
+namespace
+{
+static bool _hasRestParameter( const int argc, char* argv[] )
 {
     for( int i = 0; i < argc; ++i  )
         if( std::string( argv[i] ) == "--rest" )
-            return std::unique_ptr< RestBridge >( new RestBridge( argc, argv ));
+            return true;
+    return false;
+}
+
+}
+
+std::unique_ptr< RestBridge > RestBridge::parse(
+    const zeq::Publisher& publisher, int argc, char* argv[] )
+{
+    if( _hasRestParameter( argc, argv ))
+        return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
+                                                          publisher.getURI( )));
+    return nullptr;
+}
+
+std::unique_ptr< RestBridge > RestBridge::parse( const int argc, char* argv[] )
+{
+    if( _hasRestParameter( argc, argv ))
+        return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
+                                                              zeq::URI( )));
     return nullptr;
 }
 
 std::unique_ptr< RestBridge > RestBridge::create( const int argc, char* argv[] )
 {
-    return std::unique_ptr< RestBridge >( new RestBridge( argc, argv ));
+    return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
+                                                          zeq::URI( )));
 }
 
 std::string RestBridge::getHelp()
@@ -123,8 +152,8 @@ std::string RestBridge::getHelp()
     return help;
 }
 
-RestBridge::RestBridge( const int argc, char* argv[] )
-    : _impl( new detail::RestBridge( argc, argv ))
+RestBridge::RestBridge( const int argc, char* argv[], const zeq::URI& uri )
+    : _impl( new detail::RestBridge( argc, argv, uri ))
 {
 }
 
@@ -135,14 +164,12 @@ RestBridge::~RestBridge()
 
 servus::URI RestBridge::getPublisherURI() const
 {
-    return servus::URI( _impl->uri.getScheme() + SUBSCRIBER_SCHEME_SUFFIX +
-                        "://" );
+    return _impl->pubURI;
 }
 
 servus::URI RestBridge::getSubscriberURI() const
 {
-    return servus::URI( _impl->uri.getScheme() + PUBLISHER_SCHEME_SUFFIX +
-                        "://?subscribeSelf=true" );
+    return _impl->subURI;
 }
 
 bool RestBridge::isRunning() const

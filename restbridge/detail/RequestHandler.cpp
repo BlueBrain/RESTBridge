@@ -39,16 +39,16 @@ static const std::string REST_VERB_POST = "POST";
 
 namespace detail
 {
-
-RequestHandler::RequestHandler( const std::string& pub, const std::string& sub )
-    : subscriber_( servus::URI( sub + "://?subscribeSelf=true" ))
-    , publisher_( servus::URI( pub + "://" ))
+RequestHandler::RequestHandler( zeq::URI& publisherURI,
+                                const zeq::URI& subscriberURI )
+    : _subscriber( subscriberURI )
+    , _publisher( publisherURI )
     , listening_( true )
     , listeningThread_( boost::bind( &RequestHandler::listen_, this ))
 {
-    subscriber_.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
+    _subscriber.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
                                   boost::bind( &RequestHandler::onStartupHeartbeatEvent_, this ));
-    subscriber_.registerHandler( zeq::vocabulary::EVENT_VOCABULARY,
+    _subscriber.registerHandler( zeq::vocabulary::EVENT_VOCABULARY,
                                   boost::bind( &RequestHandler::onVocabularyEvent_, this, _1 ));
     requestLock_.lock();
 }
@@ -63,10 +63,11 @@ RequestHandler::~RequestHandler()
 void RequestHandler::listen_()
 {
     while( listening_ )
-        while( subscriber_.receive( 200 ) ){}
+        while( _subscriber.receive( 200 ) ){}
 }
 
-void RequestHandler::operator() ( const Server::request& request, Server::response& response )
+void RequestHandler::operator() ( const Server::request& request,
+                                  Server::response& response )
 {
     const std::string& method = request.method;
 
@@ -76,25 +77,29 @@ void RequestHandler::operator() ( const Server::request& request, Server::respon
             INTERNAL_CMD_VOCABULARY )
         {
             const std::string& vocabulary = restZeqTranslator_.getVocabulary();
-            response_ = Server::response::stock_reply( Server::response::ok,
-                                                       vocabulary );
+            response = Server::response::stock_reply( Server::response::ok,
+                                                      vocabulary );
+            return;
         }
-        else if( method == REST_VERB_PUT || method == REST_VERB_POST )
+        if( method == REST_VERB_PUT || method == REST_VERB_POST )
         {
-            const zeq::Event& event = restZeqTranslator_.translate( request.destination,
-                                                                    request.body );
-            processPUT_( event );
+            const zeq::Event& event =
+                restZeqTranslator_.translate( request.destination,
+                                              request.body );
+            response = processPUT_( event );
+            return;
         }
-        else if( method == REST_VERB_GET )
+        if( method == REST_VERB_GET )
         {
-            const zeq::Event& event = restZeqTranslator_.translate( request.destination );
-            processGET_( event );
+            const zeq::Event& event =
+                restZeqTranslator_.translate( request.destination );
+            response = processGET_( event );
+            return;
         }
-        else
-        {
-            RBERROR << "Unsupported http method " << method << std::endl;
-        }
-        response = response_;
+
+        response = Server::response::stock_reply( Server::response::bad_request,
+                                                  "Unsupported http method " +
+                                                  method );
     }
     catch( const std::runtime_error& e )
     {
@@ -103,26 +108,39 @@ void RequestHandler::operator() ( const Server::request& request, Server::respon
     }
 }
 
-void RequestHandler::processPUT_( const zeq::Event& event )
+Server::response RequestHandler::processPUT_( const zeq::Event& event )
 {
-    publisher_.publish( event );
-    std::ostringstream data;
-    response_ = Server::response::stock_reply( Server::response::ok, data.str() );
+    _publisher.publish( event );
+    return Server::response::stock_reply( Server::response::ok, std::string( ));
 }
 
-void RequestHandler::processGET_( const zeq::Event& event )
+Server::response RequestHandler::processGET_( const zeq::Event& event )
 {
-    publisher_.publish( event );
+    const auto& type = ::zeq::vocabulary::deserializeRequest( event );
+    Server::response response;
+    _subscriber.registerHandler( type,
+                                 boost::bind( &RequestHandler::onEvent_, this,
+                                              _1, type,
+                                              boost::ref( response )));
+    _publisher.publish( event );
 
-    //We lock here because we need to wait for the response before new requests are processed.
-    //This is unlocked when the response for the published event is received.
+    //We lock here because we need to wait for the response before new requests
+    //are processed. This is unlocked when the response for the published event
+    //is received.
     requestLock_.lock();
+    _subscriber.deregisterHandler( type );
+    return response;
 }
 
-void RequestHandler::onEvent_( const zeq::Event& event )
+void RequestHandler::onEvent_( const zeq::Event& event,
+                               const zeq::uint128_t& expected,
+                               Server::response& response )
 {
-    response_ = Server::response::stock_reply( Server::response::ok,
-                                               zeq::vocabulary::deserializeJSON( event) );
+    if( event.getType() != expected )
+        return;
+
+    response = Server::response::stock_reply( Server::response::ok,
+                                     zeq::vocabulary::deserializeJSON( event ));
     requestLock_.unlock();
 }
 
@@ -130,7 +148,7 @@ void RequestHandler::onStartupHeartbeatEvent_()
 {
     const zeq::Event& zeqEvent =
             zeq::vocabulary::serializeRequest( zeq::vocabulary::EVENT_VOCABULARY );
-    publisher_.publish( zeqEvent );
+    _publisher.publish( zeqEvent );
 }
 
 void RequestHandler::onHeartbeatEvent_()
@@ -139,32 +157,32 @@ void RequestHandler::onHeartbeatEvent_()
 
 void RequestHandler::onVocabularyEvent_( const zeq::Event& event )
 {
-    subscriber_.deregisterHandler( zeq::vocabulary::EVENT_HEARTBEAT );
-    subscriber_.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
+    _subscriber.deregisterHandler( zeq::vocabulary::EVENT_VOCABULARY );
+    _subscriber.deregisterHandler( zeq::vocabulary::EVENT_HEARTBEAT );
+    _subscriber.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
                                   boost::bind( &RequestHandler::onHeartbeatEvent_, this ) );
-    zeq::EventDescriptors eventDescriptors = zeq::vocabulary::deserializeVocabulary( event );
+    const zeq::EventDescriptors& eventDescriptors =
+        zeq::vocabulary::deserializeVocabulary( event );
 
     for( const zeq::EventDescriptor& eventDescriptor : eventDescriptors )
         addEventDescriptor_( eventDescriptor );
 }
 
-void RequestHandler::addEventDescriptor_( const zeq::EventDescriptor& eventDescriptor )
+void RequestHandler::addEventDescriptor_(
+    const zeq::EventDescriptor& descriptor )
 {
-    zeq::vocabulary::registerEvent( eventDescriptor.getEventType(),
-                                    eventDescriptor.getSchema( ));
+    zeq::vocabulary::registerEvent( descriptor.getEventType(),
+                                    descriptor.getSchema( ));
 
-    if( ( eventDescriptor.getEventDirection() == zeq::PUBLISHER ) ||
-        ( eventDescriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
+    if( ( descriptor.getEventDirection() == zeq::PUBLISHER ) ||
+        ( descriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
     {
-        restZeqTranslator_.addPublishedEvent( eventDescriptor );
-        subscriber_.registerHandler( eventDescriptor.getEventType(),
-                                      boost::bind( &RequestHandler::onEvent_,
-                                                   this, _1 ) );
+        restZeqTranslator_.addPublishedEvent( descriptor );
     }
-    if( ( eventDescriptor.getEventDirection() == zeq::SUBSCRIBER ) ||
-        ( eventDescriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
+    if( ( descriptor.getEventDirection() == zeq::SUBSCRIBER ) ||
+        ( descriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
     {
-        restZeqTranslator_.addSubscribedEvent( eventDescriptor );
+        restZeqTranslator_.addSubscribedEvent( descriptor );
     }
 }
 
