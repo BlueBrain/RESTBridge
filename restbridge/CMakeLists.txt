@@ -29,10 +29,8 @@ set(RESTBRIDGE_SOURCES
   detail/RequestHandler.cpp
   detail/RestZeqTranslator.cpp)
 
-set(MINIMAL_BOOST_LIBRARIES ${Boost_LIBRARIES})
-list(REMOVE_ITEM MINIMAL_BOOST_LIBRARIES ${Boost_PROGRAM_OPTIONS_LIBRARY})
 set(RESTBRIDGE_LINK_LIBRARIES PRIVATE cppnetlib-client-connections zeq
-  ${MINIMAL_BOOST_LIBRARIES} pthread)
+  ${Boost_LIBRARIES} pthread)
 set(RESTBRIDGE_OMIT_LIBRARY_HEADER ON)
 
 common_library(RESTBridge)
