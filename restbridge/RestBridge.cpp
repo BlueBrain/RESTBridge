@@ -36,8 +36,14 @@ namespace restbridge
 {
 namespace
 {
-static const std::string DEFAULT_SCHEME = "hbp";
-static const uint16_t DEFAULT_PORT = 4020;
+const std::string DEFAULT_SCHEME = "hbp";
+const std::string DEFAULT_PORT = "4020";
+bool _isParameter( const int i, const std::string& arg,
+                   const int argc, char* argv[] )
+{
+    return ( i < argc && arg == argv[i] && argv[i+1] && argv[i+1][0] != '-' );
+}
+
 }
 
 namespace detail
@@ -51,24 +57,31 @@ public:
         subURI.setScheme( pubURI.getScheme( ));
         for( int i = 0; i < argc; ++i  )
         {
-            if( std::string( argv[i] ) == "--rest" &&
-                i < argc && argv[i+1] && argv[i+1][0] != '-' )
+            if( _isParameter( i, "--rest", argc, argv ))
             {
-                httpURI = servus::URI( std::string( argv[i+1] ));
-                if( pubURI == zeq::URI( ))
-                    pubURI.setScheme( httpURI.getScheme( ));
-                if( subURI.getScheme().empty( ))
-                    subURI.setScheme( httpURI.getScheme( ));
+                std::string http( argv[i+1] );
+                const size_t colon = http.find( ':' );
+                if( colon == std::string::npos )
+                    httpHost = http;
+                else
+                {
+                    httpHost = http.substr( 0, colon );
+                    httpPort = http.substr( colon + 1 );
+                }
             }
+            else if( _isParameter( i, "--zeq-publisher", argc, argv ))
+                pubURI = zeq::URI( argv[ i + 1 ] );
+            else if( _isParameter( i, "--zeq-subscriber", argc, argv ))
+                subURI = zeq::URI( argv[ i + 1 ] );
         }
         if( pubURI.getScheme().empty( ))
             pubURI.setScheme( DEFAULT_SCHEME );
         if( subURI.getScheme().empty( ))
-            subURI.setScheme( DEFAULT_SCHEME );
-        if( httpURI.getPort() == 0 )
-            httpURI.setPort( DEFAULT_PORT );
-        if( httpURI.getHost().empty( ))
-            httpURI.setHost( "localhost" );
+            subURI.setScheme( pubURI.getScheme( ));
+        if( httpPort.empty( ))
+            httpPort = DEFAULT_PORT;
+        if( httpHost.empty( ))
+            httpHost = "localhost";
 
         // Request handler
         //   pub and sub are from the app POV, so need to be swapped here
@@ -76,12 +89,12 @@ public:
 
         // http server
         Server::options options( *_handler );
-        _server.reset( new Server( options.address( httpURI.getHost( )).
-                               port( std::to_string( int( httpURI.getPort( )))).
+        _server.reset( new Server( options.address( httpHost ).port( httpPort ).
                                    reuse_address( true )));
+        _server->listen();
 
-        RBDEBUG << "RestBridge running on http://" << httpURI.getHost() << ":"
-                << httpURI.getPort() << " with ZeroEQ published on " << subURI
+        RBDEBUG << "RestBridge running on http://" << httpHost << ":"
+                << httpPort << " with ZeroEQ published on " << subURI
                 << " subscribed to " << pubURI << std::endl;
 
         thread.reset( new boost::thread(
@@ -97,7 +110,8 @@ public:
         RBDEBUG << "HTTP Server stopped" << std::endl;
     }
 
-    servus::URI httpURI;
+    std::string httpHost;
+    std::string httpPort;
     servus::URI pubURI;
     servus::URI subURI;
     std::unique_ptr< boost::thread > thread;
@@ -145,11 +159,12 @@ std::unique_ptr< RestBridge > RestBridge::create( const int argc, char* argv[] )
 
 std::string RestBridge::getHelp()
 {
-    static const std::string help(
-        "  --rest [host][:port]: Enable the REST bridge. Optional parameters\n"
-        "         configure the web server, running by default on :" +
-                                  std::to_string( int( DEFAULT_PORT )));
-    return help;
+    return std::string(
+        " --rest [host][:port]: Enable the REST bridge. Optional parameters\n"
+        "        configure the web server, running by default on :" +
+          DEFAULT_PORT + "\n" +
+        " --zeq-publisher: URI where the application publishes ZeroEQ events\n"+
+        " --zeq-subscriber: URI to where the application subscribes to\n" );
 }
 
 RestBridge::RestBridge( const int argc, char* argv[], const zeq::URI& uri )

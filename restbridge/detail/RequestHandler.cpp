@@ -43,26 +43,26 @@ RequestHandler::RequestHandler( zeq::URI& publisherURI,
                                 const zeq::URI& subscriberURI )
     : _subscriber( subscriberURI )
     , _publisher( publisherURI )
-    , listening_( true )
-    , listeningThread_( boost::bind( &RequestHandler::listen_, this ))
+    , _listening( true )
+    , _thread( boost::bind( &RequestHandler::listen_, this ))
 {
     _subscriber.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
                                   boost::bind( &RequestHandler::onStartupHeartbeatEvent_, this ));
     _subscriber.registerHandler( zeq::vocabulary::EVENT_VOCABULARY,
                                   boost::bind( &RequestHandler::onVocabularyEvent_, this, _1 ));
-    requestLock_.lock();
+    _requestLock.lock();
 }
 
 RequestHandler::~RequestHandler()
 {
-    listening_ = false;
-    listeningThread_.join();
-    requestLock_.unlock();
+    _listening = false;
+    _thread.join();
+    _requestLock.unlock();
 }
 
 void RequestHandler::listen_()
 {
-    while( listening_ )
+    while( _listening )
         while( _subscriber.receive( 200 ) ){}
 }
 
@@ -73,10 +73,10 @@ void RequestHandler::operator() ( const Server::request& request,
 
     try
     {
-        if( restZeqTranslator_.getCommand( request.destination ) ==
+        if( _translator.getCommand( request.destination ) ==
             INTERNAL_CMD_VOCABULARY )
         {
-            const std::string& vocabulary = restZeqTranslator_.getVocabulary();
+            const std::string& vocabulary = _translator.getVocabulary();
             response = Server::response::stock_reply( Server::response::ok,
                                                       vocabulary );
             return;
@@ -84,15 +84,14 @@ void RequestHandler::operator() ( const Server::request& request,
         if( method == REST_VERB_PUT || method == REST_VERB_POST )
         {
             const zeq::Event& event =
-                restZeqTranslator_.translate( request.destination,
-                                              request.body );
+                _translator.translate( request.destination, request.body );
             response = processPUT_( event );
             return;
         }
         if( method == REST_VERB_GET )
         {
             const zeq::Event& event =
-                restZeqTranslator_.translate( request.destination );
+                _translator.translate( request.destination );
             response = processGET_( event );
             return;
         }
@@ -124,10 +123,10 @@ Server::response RequestHandler::processGET_( const zeq::Event& event )
                                               boost::ref( response )));
     _publisher.publish( event );
 
-    //We lock here because we need to wait for the response before new requests
-    //are processed. This is unlocked when the response for the published event
-    //is received.
-    requestLock_.lock();
+    // We lock here because we need to wait for the response before new requests
+    // are processed. This is unlocked when the response for the published event
+    // is received.
+    _requestLock.lock();
     _subscriber.deregisterHandler( type );
     return response;
 }
@@ -141,7 +140,7 @@ void RequestHandler::onEvent_( const zeq::Event& event,
 
     response = Server::response::stock_reply( Server::response::ok,
                                      zeq::vocabulary::deserializeJSON( event ));
-    requestLock_.unlock();
+    _requestLock.unlock();
 }
 
 void RequestHandler::onStartupHeartbeatEvent_()
@@ -177,12 +176,12 @@ void RequestHandler::addEventDescriptor_(
     if( ( descriptor.getEventDirection() == zeq::PUBLISHER ) ||
         ( descriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
     {
-        restZeqTranslator_.addPublishedEvent( descriptor );
+        _translator.addPublishedEvent( descriptor );
     }
     if( ( descriptor.getEventDirection() == zeq::SUBSCRIBER ) ||
         ( descriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
     {
-        restZeqTranslator_.addSubscribedEvent( descriptor );
+        _translator.addSubscribedEvent( descriptor );
     }
 }
 

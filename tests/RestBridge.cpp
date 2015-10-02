@@ -30,7 +30,7 @@ servus::Strings args = {{ "--rest" }, { "--chocolate" }, { "is-good" },
 
 BOOST_AUTO_TEST_CASE( construction_argc_argv )
 {
-    std::string uri = "zeq01://localhost:6666";
+    std::string uri = "localhost:6666";
     char* argv[] = { &args[1][0], &args[2][0], &args[3][0], &args[4][0],
                      &args[0][0], &uri[0], &args[4][0], &args[5][0] };
     const int argc = 8;
@@ -39,17 +39,17 @@ BOOST_AUTO_TEST_CASE( construction_argc_argv )
 
 BOOST_AUTO_TEST_CASE( construction_argc_argv_invalid_schema )
 {
-    std::string uri = "foo://localhost:murks";
+    std::string uri = "localhost:murks";
     char* argv[] = { &args[1][0], &args[2][0], &args[3][0], &args[4][0],
                      &args[0][0], &uri[0], &args[4][0], &args[5][0] };
     const int argc = 8;
     BOOST_CHECK_THROW( restbridge::RestBridge::parse( argc, argv ),
-                       std::exception );
+                       std::runtime_error );
 }
 
 BOOST_AUTO_TEST_CASE( argc_argv_run )
 {
-    std::string uri = "zeq02://localhost:6666";
+    std::string uri = "localhost:6666";
     char* argv[] = { &args[1][0], &args[2][0], &args[3][0], &args[4][0],
                      &args[0][0], &uri[0], &args[4][0], &args[5][0] };
     const int argc = 8;

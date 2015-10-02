@@ -18,6 +18,6 @@
 # All rights reserved. Do not distribute without further notice.
 
 set(RESTBRIDGESERVER_SOURCES RESTBridge.cpp)
-set(RESTBRIDGESERVER_LINK_LIBRARIES ${Boost_PROGRAM_OPTIONS_LIBRARY} RESTBridge
-  zeq)
+set(RESTBRIDGESERVER_LINK_LIBRARIES ${Boost_PROGRAM_OPTIONS_LIBRARY} RESTBridge)
+
 common_application(restBridgeServer)

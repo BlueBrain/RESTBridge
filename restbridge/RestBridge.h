@@ -45,6 +45,8 @@ public:
      * parameters:
      * * --rest [host][:port]: Enable the REST bridge. Optional parameters
      *   configure the web server, running by default on :4020
+     * * --zeq-publisher: URI where the application publishes ZeroEQ events
+     * * --zeq-subscriber: URI to where the application subscribes to
      *
      * @param publisher Existing publisher of the application
      * @param argc Argument count

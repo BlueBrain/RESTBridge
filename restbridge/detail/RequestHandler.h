@@ -86,12 +86,12 @@ private:
     zeq::Subscriber _subscriber;
     zeq::Publisher _publisher;
 
-    std::mutex requestLock_;
+    std::mutex _requestLock;
 
-    bool listening_;
-    boost::thread listeningThread_;
+    bool _listening;
+    boost::thread _thread;
 
-    RestZeqTranslator restZeqTranslator_;
+    RestZeqTranslator _translator;
 };
 
 }

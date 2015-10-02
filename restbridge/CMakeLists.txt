@@ -29,8 +29,8 @@ set(RESTBRIDGE_SOURCES
   detail/RequestHandler.cpp
   detail/RestZeqTranslator.cpp)
 
-set(RESTBRIDGE_LINK_LIBRARIES PRIVATE cppnetlib-client-connections zeq
-  ${Boost_LIBRARIES} pthread)
+set(RESTBRIDGE_LINK_LIBRARIES PUBLIC zeq
+  PRIVATE cppnetlib-client-connections ${Boost_LIBRARIES} pthread)
 set(RESTBRIDGE_OMIT_LIBRARY_HEADER ON)
 
 common_library(RESTBridge)
