@@ -23,10 +23,13 @@
 
 #include <restbridge/types.h>
 #include <restbridge/detail/RestZeqTranslator.h>
-
+#include <zeq/publisher.h>
+#include <zeq/subscriber.h>
 #include <boost/network/protocol/http/server.hpp>
-#include <boost/scoped_ptr.hpp>
-#undef ECHO // On RedHat, ECHO is already defined and conflicts with the ECHO ZEq event
+#include <mutex>
+#ifdef ECHO
+#  undef ECHO // Global namespace pollution conflicts with the ECHO ZEq event
+#endif
 
 namespace restbridge
 {
@@ -34,13 +37,7 @@ namespace detail
 {
 
 class RequestHandler;
-typedef boost::network::http::server<RequestHandler> server;
-
-static const std::string REST_VERB_GET = "GET";
-static const std::string REST_VERB_PUT = "PUT";
-static const std::string REST_VERB_DELETE = "DELETE";
-static const std::string REST_VERB_PATCH = "PATCH";
-static const std::string REST_VERB_POST = "POST";
+typedef boost::network::http::server< RequestHandler > Server;
 
 /**
  * The RequestHandler class handles incoming HTTP requests and
@@ -50,15 +47,12 @@ static const std::string REST_VERB_POST = "POST";
 class RequestHandler
 {
 public:
-
     /**
      * Constructor
      * @param publisherSchema Schema on which zeq events will be published
      * @param subscriberSchema Schema on which zeq events will be received
      */
-    RequestHandler( const std::string& publisherSchema,
-                    const std::string& subscriberSchema );
-
+    RequestHandler( zeq::URI& publisherURI, const zeq::URI& subscriberURI );
     ~RequestHandler();
 
     /**
@@ -67,38 +61,37 @@ public:
      * @param request Incoming HTTP request
      * @param response Response to be sent back
      */
-    void operator() ( const server::request &request, server::response &response );
+    void operator() ( const Server::request& request,
+                      Server::response& response );
 
     /**
      * Callback method used for logging internal errors raised by the underlying
      * cppnetlib library.
      * @param info String containing the error message
      */
-    void log( server::string_type const &info );
+    void log( const Server::string_type& info );
 
 private:
     void onStartupHeartbeatEvent_();
     void onHeartbeatEvent_();
     void onVocabularyEvent_( const zeq::Event& event );
-    void onEvent_( const zeq::Event& event );
+    void onEvent_( const zeq::Event& event, const zeq::uint128_t& expected,
+                   Server::response& response );
     void addEventDescriptor_( const zeq::EventDescriptor& eventDescriptor );
 
-    void processPUT_( const zeq::Event& event );
-    void processGET_( const zeq::Event& event );
+    Server::response processPUT_( const zeq::Event& event );
+    Server::response processGET_( const zeq::Event& event );
     void listen_();
 
-    boost::scoped_ptr< zeq::Subscriber > subscriber_;
-    boost::scoped_ptr< zeq::Publisher > publisher_;
+    zeq::Subscriber _subscriber;
+    zeq::Publisher _publisher;
 
-    boost::mutex requestLock_;
+    std::mutex _requestLock;
 
-    bool listening_;
-    boost::scoped_ptr< boost::thread > listeningThread_;
+    bool _listening;
+    boost::thread _thread;
 
-    server::request request_;
-    server::response response_;
-
-    RestZeqTranslator restZeqTranslator_;
+    RestZeqTranslator _translator;
 };
 
 }

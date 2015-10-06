@@ -1,5 +1,6 @@
 /* Copyright (c) 2014-2015, Human Brain Project
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
+ *                          Stefan.Eilemann@epfl.ch
  *
  * This file is part of RESTBridge <https://github.com/BlueBrain/RESTBridge>
  *
@@ -33,128 +34,141 @@
 
 namespace restbridge
 {
+namespace
+{
+const std::string DEFAULT_SCHEME = "hbp";
+const std::string DEFAULT_PORT = "4020";
+bool _isParameter( const int i, const std::string& arg,
+                   const int argc, char* argv[] )
+{
+    return ( i < argc && arg == argv[i] && argv[i+1] && argv[i+1][0] != '-' );
+}
 
-static const std::string PUBLISHER_SCHEMA_SUFFIX = "cmd://";
-static const std::string SUBSCRIBER_SCHEMA_SUFFIX = "resp://";
+}
 
 namespace detail
 {
 class RestBridge
 {
 public:
-    RestBridge( const std::string& hostname, const uint16_t port )
-        : serverRunning_( false )
-        , hostname_( hostname )
-        , port_( port )
+    RestBridge( const int argc, char* argv[], const zeq::URI& uri )
+        : pubURI( uri )
     {
-    }
-
-    RestBridge( const int argc, const char** argv )
-        : serverRunning_( false )
-    {
+        subURI.setScheme( pubURI.getScheme( ));
         for( int i = 0; i < argc; ++i  )
         {
-            if( std::string( argv[i] ) == "--restbridge-zeq" )
+            if( _isParameter( i, "--rest", argc, argv ))
             {
-                try
+                std::string http( argv[i+1] );
+                const size_t colon = http.find( ':' );
+                if( colon == std::string::npos )
+                    httpHost = http;
+                else
                 {
-                     const servus::URI uri( (std::string( argv[i+1] )));
-                     if( uri.getScheme().empty() )
-                         RBTHROW( std::runtime_error( "Empty zeq schema" ));
-
-                     if( uri.getHost().empty() )
-                         RBTHROW( std::runtime_error( "Empty host" ));
-
-                     if( !uri.getPort())
-                         RBTHROW( std::runtime_error( "Port is zero" ));
-
-                     schema_ = uri.getScheme();
-                     hostname_ = uri.getHost();
-                     port_ = uri.getPort();
-                }
-                catch( ... )
-                {
-                    RBTHROW( std::runtime_error( "Servus uri parsing error" ));
+                    httpHost = http.substr( 0, colon );
+                    httpPort = http.substr( colon + 1 );
                 }
             }
+            else if( _isParameter( i, "--zeq-publisher", argc, argv ))
+                pubURI = zeq::URI( argv[ i + 1 ] );
+            else if( _isParameter( i, "--zeq-subscriber", argc, argv ))
+                subURI = zeq::URI( argv[ i + 1 ] );
         }
+        if( pubURI.getScheme().empty( ))
+            pubURI.setScheme( DEFAULT_SCHEME );
+        if( subURI.getScheme().empty( ))
+            subURI.setScheme( pubURI.getScheme( ));
+        if( httpPort.empty( ))
+            httpPort = DEFAULT_PORT;
+        if( httpHost.empty( ))
+            httpHost = "localhost";
+
+        // Request handler
+        //   pub and sub are from the app POV, so need to be swapped here
+        _handler.reset( new RequestHandler( subURI, pubURI ));
+
+        // http server
+        Server::options options( *_handler );
+        _server.reset( new Server( options.address( httpHost ).port( httpPort ).
+                                   reuse_address( true )));
+        _server->listen();
+
+        RBDEBUG << "RestBridge running on http://" << httpHost << ":"
+                << httpPort << " with ZeroEQ published on " << subURI
+                << " subscribed to " << pubURI << std::endl;
+
+        thread.reset( new boost::thread(
+                          boost::bind( &detail::Server::run, _server.get( ))));
     }
 
     ~RestBridge()
     {
-        if( serverRunning_ )
-        {
-            try
-            {
-                stop();
-            }
-            catch( ... ) {}
-        }
+        if( _server )
+            _server->stop();
+        if( thread )
+            thread->join();
+        RBDEBUG << "HTTP Server stopped" << std::endl;
     }
 
-    bool waitForRunningState(const uint16_t milliseconds)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-        return serverRunning_;
-    }
+    std::string httpHost;
+    std::string httpPort;
+    servus::URI pubURI;
+    servus::URI subURI;
+    std::unique_ptr< boost::thread > thread;
 
-    void run( const std::string& schema )
-    {
-        if( !schema.empty() )
-            schema_ = schema;
-        std::unique_lock<std::mutex> lock(mutex_);
-        const std::string publisherSchema = schema_ + PUBLISHER_SCHEMA_SUFFIX;
-        const std::string subscriberSchema = schema_ + SUBSCRIBER_SCHEMA_SUFFIX;
-        // Create request handler
-        RequestHandler handler( publisherSchema, subscriberSchema );
-
-        server::options options( handler );
-        std::stringstream port;
-        port << port_;
-        // Create http server
-        httpServer_.reset( new server( options.address( hostname_ ).port( port.str( ))));
-
-        RBDEBUG << "HTTP Server runnning on " << hostname_ << ":" << port_ << std::endl;
-        RBDEBUG << "ZeroEq Publisher Schema : " << publisherSchema << std::endl;
-        RBDEBUG << "ZeroEq Subscriber Schema: " << subscriberSchema << std::endl;
-        serverRunning_ = true;
-        // Start processing http requests
-        httpServer_->run();
-    }
-
-    void stop()
-    {
-        if( !thread_ || !serverRunning_ )
-            RBTHROW( std::runtime_error( "HTTP server is not running, cannot stop it" ));
-        // Stop http server hosted by thread_
-        httpServer_->stop();
-
-        // Wait until the http server is stopped
-        std::unique_lock<std::mutex> lock(mutex_);
-        // Stop listening thread
-        thread_->join();
-        serverRunning_ = false;
-        RBDEBUG << "HTTP Server on " << hostname_ << ":" << port_
-                << " is stopped" << std::endl;
-    }
-
-    boost::scoped_ptr< boost::thread > thread_;
-    boost::scoped_ptr< server > httpServer_;
-    std::mutex mutex_;
-    std::atomic<bool> serverRunning_;
-    std::string hostname_;
-    uint16_t port_;
-    std::string schema_;
+private:
+    std::unique_ptr< Server > _server;
+    std::unique_ptr< RequestHandler > _handler;
 };
 }
 
-RestBridge::RestBridge( const std::string& hostname, const uint16_t port )
-    : _impl( new detail::RestBridge( hostname, port ))
+namespace
 {
+static bool _hasRestParameter( const int argc, char* argv[] )
+{
+    for( int i = 0; i < argc; ++i  )
+        if( std::string( argv[i] ) == "--rest" )
+            return true;
+    return false;
 }
 
-RestBridge::RestBridge( const int argc, const char** argv )
-    : _impl( new detail::RestBridge( argc, argv ))
+}
+
+std::unique_ptr< RestBridge > RestBridge::parse(
+    const zeq::Publisher& publisher, int argc, char* argv[] )
+{
+    if( _hasRestParameter( argc, argv ))
+        return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
+                                                          publisher.getURI( )));
+    return nullptr;
+}
+
+std::unique_ptr< RestBridge > RestBridge::parse( const int argc, char* argv[] )
+{
+    if( _hasRestParameter( argc, argv ))
+        return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
+                                                              zeq::URI( )));
+    return nullptr;
+}
+
+std::unique_ptr< RestBridge > RestBridge::create( const int argc, char* argv[] )
+{
+    return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
+                                                          zeq::URI( )));
+}
+
+std::string RestBridge::getHelp()
+{
+    return std::string(
+        " --rest [host][:port]: Enable the REST bridge. Optional parameters\n"
+        "        configure the web server, running by default on :" +
+          DEFAULT_PORT + "\n" +
+        " --zeq-publisher: URI where the application publishes ZeroEQ events\n"+
+        " --zeq-subscriber: URI to where the application subscribes to\n" );
+}
+
+RestBridge::RestBridge( const int argc, char* argv[], const zeq::URI& uri )
+    : _impl( new detail::RestBridge( argc, argv, uri ))
 {
 }
 
@@ -163,19 +177,19 @@ RestBridge::~RestBridge()
     delete _impl;
 }
 
-void RestBridge::run( const std::string& schema )
+servus::URI RestBridge::getPublisherURI() const
 {
-    if( _impl->thread_ )
-        RBTHROW( std::runtime_error( "HTTP server is already running" ));
-    _impl->thread_.reset( new boost::thread(
-        boost::bind( &detail::RestBridge::run, _impl, schema )));
-    if( !_impl->waitForRunningState(2000) )
-        RBTHROW( std::runtime_error( "HTTP server could not be started" ));
+    return _impl->pubURI;
 }
 
-void RestBridge::stop()
+servus::URI RestBridge::getSubscriberURI() const
 {
-    _impl->stop();
+    return _impl->subURI;
+}
+
+bool RestBridge::isRunning() const
+{
+    return _impl->thread != nullptr;
 }
 
 }

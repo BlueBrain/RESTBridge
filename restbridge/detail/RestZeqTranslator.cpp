@@ -49,8 +49,8 @@ RestZeqTranslator::~RestZeqTranslator()
 {
 }
 
-zeq::Event RestZeqTranslator::translate ( const std::string& request,
-                                          const std::string& body ) const
+zeq::Event RestZeqTranslator::translate( const std::string& request,
+                                         const std::string& body ) const
 {
     const std::string& command = getCommand( request );
 
@@ -75,19 +75,19 @@ zeq::Event RestZeqTranslator::translate( const std::string& request ) const
 std::string RestZeqTranslator::getCommand( const std::string& request ) const
 {
     if( request.empty() )
-        RBTHROW(InvalidRequest("Empty request") );
+        RBTHROW( InvalidRequest( "Empty request" ));
 
     servus::Strings dataParts;
-
     boost::split( dataParts, request, boost::is_any_of( "/" ) );
     servus::Strings commandAndPayload;
-    boost::split( commandAndPayload, dataParts.back(), boost::is_any_of( "?" ) );
+    boost::split( commandAndPayload, dataParts.back(), boost::is_any_of( "?" ));
 
-    if( ( commandAndPayload.empty() ) || commandAndPayload.front().empty() )
-        RBTHROW(InvalidRequest("Empty command string") );
+    if( commandAndPayload.empty() || commandAndPayload.front().empty( ))
+        RBTHROW( InvalidRequest( "Empty command string" ));
 
-    //We insure that REST command is lowercase because urls are not case sensitive
-    std::transform( commandAndPayload.front().begin(), commandAndPayload.front().end(),
+    // Ensure that REST command is lowercase because urls are not case sensitive
+    std::transform( commandAndPayload.front().begin(),
+                    commandAndPayload.front().end(),
                     commandAndPayload.front().begin(), ::tolower );
 
     return commandAndPayload.front();
@@ -99,8 +99,9 @@ void RestZeqTranslator::addPublishedEvent( const zeq::EventDescriptor& eventDesc
     std::string lowercaseRestName = eventDescriptor.getRestName();
     std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
                     lowercaseRestName.begin(), ::tolower );
-    vocabularyPublished_[ lowercaseRestName ] = zeqEventDescriptor( eventDescriptor.getEventType(),
-                                                                    eventDescriptor.getSchema() );
+    vocabularyPublished_[ lowercaseRestName ] =
+        zeqEventDescriptor( eventDescriptor.getEventType(),
+                            eventDescriptor.getSchema() );
 }
 
 void RestZeqTranslator::addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor )

@@ -21,12 +21,11 @@
 #ifndef RESTRESTBRIDGE_TYPES_H
 #define RESTRESTBRIDGE_TYPES_H
 
+#include <zeq/types.h>
+
 namespace restbridge
 {
-
-class RequestHandler;
-class RestZeqTranslator;
-
+class RestBridge;
 }
 
 #endif // RESTBRIDGE_TYPES_H
