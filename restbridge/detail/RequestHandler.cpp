@@ -46,6 +46,7 @@ RequestHandler::RequestHandler( zeq::URI& publisherURI,
     , _listening( true )
     , _thread( boost::bind( &RequestHandler::listen_, this ))
 {
+    publisherURI = _publisher.getURI();
     _subscriber.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
                                   boost::bind( &RequestHandler::onStartupHeartbeatEvent_, this ));
     _subscriber.registerHandler( zeq::vocabulary::EVENT_VOCABULARY,
