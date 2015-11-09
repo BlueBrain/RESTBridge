@@ -29,7 +29,15 @@ set(VERSION_MINOR "2")
 set(VERSION_PATCH "0")
 set(VERSION_ABI 1)
 
-set(RESTBRIDGE_DESCRIPTION "A library that provides a simple way to expose a REST interface in a C++ application")
+set(RESTBRIDGE_DESCRIPTION "A library that provides a simple way to expose a 
+                            REST interface in a C++ application")
+set(RESTBRIDGE_ISSUES_URL "https://github.com/BlueBrain/RESTBridge/issues")
+set(RESTBRIDGE_MAINTAINER
+  "BBP Visualization Team <bbp-open-source@googlegroups.com>")
+set(RESTBRIDGE_LICENSE LGPL)
+
+include(Common)
+
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 option(CPP-NETLIB_BUILD_SHARED_LIBS "Build cpp-netlib as shared libraries." ON)
 option(CPP-NETLIB_BUILD_EXAMPLES "Build the cpp-netlib project examples." OFF)
@@ -38,8 +46,6 @@ if(APPLE)
   # WAR otherwise system OpenSSL is preferred
   list(INSERT CMAKE_PREFIX_PATH 0 /opt/local)
 endif()
-
-include(Common)
 
 common_package(Boost REQUIRED COMPONENTS unit_test_framework system thread)
 common_package(cppnetlib SYSTEM REQUIRED)

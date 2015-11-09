@@ -13,12 +13,14 @@ if you find any other issue with this release.
 
 # Changes {#Changes}
 
-## RESTBridge 0.2 (git-master) {#version020}
+## RESTBridge 0.2 (09-Nov-2015) {#version020}
 
-* [23](https://github.com/BlueBrain/RESTBridge/pull/23):
-Fix vocabulary to return all registered events, not only one
+* [43](https://github.com/BlueBrain/RESTBridge/pull/43):
+Allow using existing publisher, remove zeroconf-based discovery
 * [26](https://github.com/BlueBrain/RESTBridge/pull/26):
 RESTBridge can parse command line parameters
+* [23](https://github.com/BlueBrain/RESTBridge/pull/23):
+Fix vocabulary to return all registered events, not only one
 
 ## RESTBridge 0.1 (09-Jul-2015) {#version010}
 
