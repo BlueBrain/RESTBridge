@@ -24,8 +24,6 @@
 
 #include <zeq/hbp/vocabulary.h>
 
-#include <servus/uri.h>
-
 namespace restbridge
 {
 namespace
@@ -41,8 +39,8 @@ namespace detail
 {
 RequestHandler::RequestHandler( zeq::URI& publisherURI,
                                 const zeq::URI& subscriberURI )
-    : _subscriber( subscriberURI )
-    , _publisher( publisherURI )
+    : _subscriber( subscriberURI, zeq::DEFAULT_SESSION )
+    , _publisher( publisherURI, zeq::DEFAULT_SESSION )
     , _listening( true )
     , _thread( boost::bind( &RequestHandler::listen_, this ))
 {
