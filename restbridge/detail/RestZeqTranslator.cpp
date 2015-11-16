@@ -39,8 +39,6 @@ namespace restbridge
 namespace detail
 {
 
-RestZeqTranslator::RestZeqTranslatorException::~RestZeqTranslatorException() {}
-
 RestZeqTranslator::RestZeqTranslator()
 {
 }
@@ -56,7 +54,7 @@ zeq::Event RestZeqTranslator::translate( const std::string& request,
 
     VocabularyMap::const_iterator it = vocabularySubscribed_.find( command );
     if( it == vocabularySubscribed_.end() )
-        RBTHROW(CommandNotFound( command ) );
+        RBTHROW( CommandNotFound( command ));
 
     return zeq::vocabulary::serializeJSON( it->second.eventType_, body );
 }
@@ -100,8 +98,8 @@ void RestZeqTranslator::addPublishedEvent( const zeq::EventDescriptor& eventDesc
     std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
                     lowercaseRestName.begin(), ::tolower );
     vocabularyPublished_[ lowercaseRestName ] =
-        zeqEventDescriptor( eventDescriptor.getEventType(),
-                            eventDescriptor.getSchema() );
+        ZeqEventDescriptor( eventDescriptor.getEventType(),
+                            eventDescriptor.getSchema( ));
 }
 
 void RestZeqTranslator::addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor )
@@ -110,8 +108,9 @@ void RestZeqTranslator::addSubscribedEvent( const zeq::EventDescriptor& eventDes
     std::string lowercaseRestName = eventDescriptor.getRestName();
     std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
                     lowercaseRestName.begin(), ::tolower );
-    vocabularySubscribed_[ lowercaseRestName ] = zeqEventDescriptor( eventDescriptor.getEventType(),
-                                                                     eventDescriptor.getSchema() );
+    vocabularySubscribed_[ lowercaseRestName ] =
+        ZeqEventDescriptor( eventDescriptor.getEventType(),
+                            eventDescriptor.getSchema( ));
 }
 
 std::string RestZeqTranslator::getVocabulary() const

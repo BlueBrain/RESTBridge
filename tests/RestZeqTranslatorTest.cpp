@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( test_unknownEvent )
         restZeqTranslator.translate( commandString );
         test = true;
     }
-    catch( const restbridge::detail::RestZeqTranslator::RestZeqTranslatorException& )
+    catch( const restbridge::detail::RestZeqTranslator::Exception& )
     {
         test = false;
     }
