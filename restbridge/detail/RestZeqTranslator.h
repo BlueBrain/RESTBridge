@@ -38,29 +38,26 @@ static const std::string INTERNAL_CMD_VOCABULARY = "vocabulary";
 class RestZeqTranslator
 {
 public:
-
-    class RestZeqTranslatorException : public std::runtime_error
+    class Exception : public std::runtime_error
     {
     public:
-        explicit RestZeqTranslatorException( const std::string& message )
+        explicit Exception( const std::string& message )
             : std::runtime_error( message ) {}
 
-        virtual ~RestZeqTranslatorException() = 0;
+        virtual ~Exception() {}
     };
-    class CommandNotFound : public RestZeqTranslatorException
+    class CommandNotFound : public Exception
     {
     public:
         explicit CommandNotFound( const std::string& message )
-            : RestZeqTranslatorException( message ) {}
+            : Exception( message ) {}
     };
-    class InvalidRequest : public RestZeqTranslatorException
+    class InvalidRequest : public Exception
     {
     public:
         explicit InvalidRequest( const std::string& message )
-            : RestZeqTranslatorException( message ) {}
+            : Exception( message ) {}
     };
-
-public:
 
     RestZeqTranslator();
     ~RestZeqTranslator();
@@ -84,17 +81,20 @@ public:
      * @throw CommandNotFound if REST command is not supported
      * @return the generated zeq event
      */
-    zeq::Event translate( const std::string& request, const std::string& body ) const;
+    zeq::Event translate( const std::string& request, const std::string& body )
+        const;
 
     /**
      * Add an event of type PUBLISHER into RestZeqTranslator known events map.
-     * @param eventDescpriptor The desciptor of the event (restName, eventType, eventSchema )
+     * @param eventDescriptor The descriptor of the event (restName, eventType,
+     *                        eventSchema )
      */
     void addPublishedEvent( const zeq::EventDescriptor& eventDescriptor );
 
     /**
      * Add an event of type SUBSCRIBER into RestZeqTranslator known events map.
-     * @param eventDescpriptor The desciptor of the event (restName, eventType, eventSchema )
+     * @param eventDescriptor The descriptor of the event (restName, eventType,
+     *                        eventSchema )
      */
     void addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor );
 
@@ -112,12 +112,10 @@ public:
     std::string getVocabulary() const;
 
 private:
-
-    struct zeqEventDescriptor
+    struct ZeqEventDescriptor
     {
-        zeqEventDescriptor() {}
-
-        zeqEventDescriptor( zeq::uint128_t eventType, std::string eventSchema  )
+        ZeqEventDescriptor() {}
+        ZeqEventDescriptor( zeq::uint128_t eventType, std::string eventSchema  )
             : eventType_( eventType )
             , eventSchema_( eventSchema )
         {}
@@ -126,7 +124,7 @@ private:
         std::string eventSchema_;
     };
 
-    typedef std::map< std::string, zeqEventDescriptor > VocabularyMap;
+    typedef std::map< std::string, ZeqEventDescriptor > VocabularyMap;
 
     VocabularyMap vocabularyPublished_;
     VocabularyMap vocabularySubscribed_;
