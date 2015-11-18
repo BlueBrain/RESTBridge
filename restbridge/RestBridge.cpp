@@ -22,7 +22,7 @@
 #include "restbridge/log.h"
 #include "detail/RequestHandler.h"
 
-#include <servus/uri.h>
+#include <zeq/uri.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
@@ -36,7 +36,6 @@ namespace restbridge
 {
 namespace
 {
-const std::string DEFAULT_SCHEME = "hbp";
 const std::string DEFAULT_PORT = "4020";
 bool _isParameter( const int i, const std::string& arg,
                    const int argc, char* argv[] )
@@ -54,7 +53,6 @@ public:
     RestBridge( const int argc, char* argv[], const zeq::URI& uri )
         : pubURI( uri )
     {
-        subURI.setScheme( pubURI.getScheme( ));
         for( int i = 0; i < argc; ++i  )
         {
             if( _isParameter( i, "--rest", argc, argv ))
@@ -74,10 +72,6 @@ public:
             else if( _isParameter( i, "--zeq-subscriber", argc, argv ))
                 subURI = zeq::URI( argv[ i + 1 ] );
         }
-        if( pubURI.getScheme().empty( ))
-            pubURI.setScheme( DEFAULT_SCHEME );
-        if( subURI.getScheme().empty( ))
-            subURI.setScheme( pubURI.getScheme( ));
         if( httpPort.empty( ))
             httpPort = DEFAULT_PORT;
         if( httpHost.empty( ))
@@ -112,8 +106,8 @@ public:
 
     std::string httpHost;
     std::string httpPort;
-    servus::URI pubURI;
-    servus::URI subURI;
+    zeq::URI pubURI;
+    zeq::URI subURI;
     std::unique_ptr< boost::thread > thread;
 
 private:
@@ -177,12 +171,12 @@ RestBridge::~RestBridge()
     delete _impl;
 }
 
-servus::URI RestBridge::getPublisherURI() const
+zeq::URI RestBridge::getPublisherURI() const
 {
     return _impl->pubURI;
 }
 
-servus::URI RestBridge::getSubscriberURI() const
+zeq::URI RestBridge::getSubscriberURI() const
 {
     return _impl->subURI;
 }
