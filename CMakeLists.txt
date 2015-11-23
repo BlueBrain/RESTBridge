@@ -44,7 +44,7 @@ option(CPP-NETLIB_BUILD_EXAMPLES "Build the cpp-netlib project examples." OFF)
 
 if(APPLE)
   # WAR otherwise system OpenSSL is preferred
-  list(INSERT CMAKE_PREFIX_PATH 0 /opt/local)
+  list(INSERT CMAKE_PREFIX_PATH 0 /opt/local /usr/local)
 endif()
 
 common_package(Boost REQUIRED COMPONENTS unit_test_framework system thread)
