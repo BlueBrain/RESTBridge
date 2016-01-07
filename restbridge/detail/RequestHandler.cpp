@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
@@ -33,6 +33,7 @@ static const std::string REST_VERB_PUT = "PUT";
 static const std::string REST_VERB_DELETE = "DELETE";
 static const std::string REST_VERB_PATCH = "PATCH";
 static const std::string REST_VERB_POST = "POST";
+static const std::string INTERNAL_CMD_VOCABULARY = "vocabulary";
 }
 
 namespace detail
@@ -45,10 +46,9 @@ RequestHandler::RequestHandler( zeq::URI& publisherURI,
     , _thread( boost::bind( &RequestHandler::listen_, this ))
 {
     publisherURI = _publisher.getURI();
-    _subscriber.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
-                                  boost::bind( &RequestHandler::onStartupHeartbeatEvent_, this ));
     _subscriber.registerHandler( zeq::vocabulary::EVENT_VOCABULARY,
-                                  boost::bind( &RequestHandler::onVocabularyEvent_, this, _1 ));
+                                 boost::bind( &RequestHandler::onVocabularyEvent_,
+                                              this, _1 ));
     _requestLock.lock();
 }
 
@@ -56,13 +56,20 @@ RequestHandler::~RequestHandler()
 {
     _listening = false;
     _thread.join();
-    _requestLock.unlock();
 }
 
 void RequestHandler::listen_()
 {
+    const zeq::Event& vocabularyRequest =
+        zeq::vocabulary::serializeRequest( zeq::vocabulary::EVENT_VOCABULARY );
+
     while( _listening )
-        while( _subscriber.receive( 200 ) ){}
+    {
+        if( _subscriber.hasHandler( zeq::vocabulary::EVENT_VOCABULARY ))
+            _publisher.publish( vocabularyRequest );
+        while( _subscriber.receive( 200 ))
+        {}
+    }
 }
 
 void RequestHandler::operator() ( const Server::request& request,
@@ -142,23 +149,9 @@ void RequestHandler::onEvent_( const zeq::Event& event,
     _requestLock.unlock();
 }
 
-void RequestHandler::onStartupHeartbeatEvent_()
-{
-    const zeq::Event& zeqEvent =
-            zeq::vocabulary::serializeRequest( zeq::vocabulary::EVENT_VOCABULARY );
-    _publisher.publish( zeqEvent );
-}
-
-void RequestHandler::onHeartbeatEvent_()
-{
-}
-
 void RequestHandler::onVocabularyEvent_( const zeq::Event& event )
 {
     _subscriber.deregisterHandler( zeq::vocabulary::EVENT_VOCABULARY );
-    _subscriber.deregisterHandler( zeq::vocabulary::EVENT_HEARTBEAT );
-    _subscriber.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
-                                  boost::bind( &RequestHandler::onHeartbeatEvent_, this ) );
     const zeq::EventDescriptors& eventDescriptors =
         zeq::vocabulary::deserializeVocabulary( event );
 
@@ -172,13 +165,13 @@ void RequestHandler::addEventDescriptor_(
     zeq::vocabulary::registerEvent( descriptor.getEventType(),
                                     descriptor.getSchema( ));
 
-    if( ( descriptor.getEventDirection() == zeq::PUBLISHER ) ||
-        ( descriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
+    if( descriptor.getEventDirection() == zeq::PUBLISHER ||
+        descriptor.getEventDirection() == zeq::BIDIRECTIONAL )
     {
         _translator.addPublishedEvent( descriptor );
     }
-    if( ( descriptor.getEventDirection() == zeq::SUBSCRIBER ) ||
-        ( descriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
+    if( descriptor.getEventDirection() == zeq::SUBSCRIBER ||
+        descriptor.getEventDirection() == zeq::BIDIRECTIONAL )
     {
         _translator.addSubscribedEvent( descriptor );
     }
