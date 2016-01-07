@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
@@ -72,8 +72,6 @@ public:
     void log( const Server::string_type& info );
 
 private:
-    void onStartupHeartbeatEvent_();
-    void onHeartbeatEvent_();
     void onVocabularyEvent_( const zeq::Event& event );
     void onEvent_( const zeq::Event& event, const zeq::uint128_t& expected,
                    Server::response& response );

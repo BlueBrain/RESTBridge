@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2015, Human Brain Project
+/* Copyright (c) 2014-2016, Human Brain Project
  *                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
  *
  * This file is part of RESTBridge <https://github.com/BlueBrain/RESTBridge>
@@ -22,15 +22,12 @@
 
 #include <zeq/event.h>
 
-#include <map>
+#include <unordered_map>
 
 namespace restbridge
 {
 namespace detail
 {
-
-static const std::string INTERNAL_CMD_VOCABULARY = "vocabulary";
-
 /**
  * The RestZeqTranslator class is responsible translating REST commands
  * into zeq events. The translation is based on registered vocabularies.
@@ -124,13 +121,12 @@ private:
         std::string eventSchema_;
     };
 
-    typedef std::map< std::string, ZeqEventDescriptor > VocabularyMap;
+    typedef std::unordered_map< std::string, ZeqEventDescriptor > VocabularyMap;
 
     VocabularyMap vocabularyPublished_;
     VocabularyMap vocabularySubscribed_;
 
     std::string command_;
-
 };
 
 }

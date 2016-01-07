@@ -91,9 +91,10 @@ std::string RestZeqTranslator::getCommand( const std::string& request ) const
     return commandAndPayload.front();
 }
 
-void RestZeqTranslator::addPublishedEvent( const zeq::EventDescriptor& eventDescriptor )
+void RestZeqTranslator::addPublishedEvent(
+    const zeq::EventDescriptor& eventDescriptor )
 {
-    //We insure that restName is lowercase because urls are not case sensitive
+    // We ensure that restName is lowercase because urls are not case sensitive
     std::string lowercaseRestName = eventDescriptor.getRestName();
     std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
                     lowercaseRestName.begin(), ::tolower );
@@ -102,9 +103,10 @@ void RestZeqTranslator::addPublishedEvent( const zeq::EventDescriptor& eventDesc
                             eventDescriptor.getSchema( ));
 }
 
-void RestZeqTranslator::addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor )
+void RestZeqTranslator::addSubscribedEvent(
+    const zeq::EventDescriptor& eventDescriptor )
 {
-    //We insure that restName is lowercase because urls are not case sensitive
+    // We ensure that restName is lowercase because urls are not case sensitive
     std::string lowercaseRestName = eventDescriptor.getRestName();
     std::transform( lowercaseRestName.begin(), lowercaseRestName.end(),
                     lowercaseRestName.begin(), ::tolower );
@@ -118,8 +120,8 @@ std::string RestZeqTranslator::getVocabulary() const
     boost::property_tree::ptree vocabulary;
     boost::property_tree::ptree subscribedVocabulary;
 
-    for ( VocabularyMap::const_iterator it = vocabularySubscribed_.begin();
-          it != vocabularySubscribed_.end(); ++it )
+    for( VocabularyMap::const_iterator it = vocabularySubscribed_.begin();
+         it != vocabularySubscribed_.end(); ++it )
     {
         boost::property_tree::ptree event;
         event.add( JSON_COMMAND, it->first );
@@ -131,8 +133,8 @@ std::string RestZeqTranslator::getVocabulary() const
     vocabulary.add_child( JSON_SUBSCRIBER, subscribedVocabulary );
     boost::property_tree::ptree publishedVocabulary;
 
-    for ( VocabularyMap::const_iterator it = vocabularyPublished_.begin();
-          it != vocabularyPublished_.end(); ++it )
+    for( VocabularyMap::const_iterator it = vocabularyPublished_.begin();
+         it != vocabularyPublished_.end(); ++it )
     {
         boost::property_tree::ptree event;
         event.add( JSON_COMMAND, it->first );
