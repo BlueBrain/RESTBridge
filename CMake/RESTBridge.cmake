@@ -1,3 +1,0 @@
-set(RESTBRIDGE_DEB_DEPENDS libcppnetlib-dev)
-set(RESTBRIDGE_SUBPROJECT ON)
-
