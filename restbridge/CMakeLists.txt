@@ -29,7 +29,7 @@ set(RESTBRIDGE_SOURCES
   detail/RequestHandler.cpp
   detail/RestZeqTranslator.cpp)
 
-set(RESTBRIDGE_LINK_LIBRARIES PUBLIC zeq
+set(RESTBRIDGE_LINK_LIBRARIES PUBLIC ZeroEQ
   PRIVATE cppnetlib-client-connections ${Boost_LIBRARIES} pthread)
 set(RESTBRIDGE_OMIT_LIBRARY_HEADER ON)
 

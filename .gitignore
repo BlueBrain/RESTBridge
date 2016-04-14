@@ -4,4 +4,6 @@ CMake/common/
 build/
 FlatBuffers/
 cppnetlib/
-zeq/
+Servus/
+ZeroEQ/
+httpxx/

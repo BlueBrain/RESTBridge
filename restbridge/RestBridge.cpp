@@ -22,7 +22,7 @@
 #include "restbridge/log.h"
 #include "detail/RequestHandler.h"
 
-#include <zeq/uri.h>
+#include <zeroeq/uri.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
@@ -50,7 +50,7 @@ namespace detail
 class RestBridge
 {
 public:
-    RestBridge( const int argc, char* argv[], const zeq::URI& uri )
+    RestBridge( const int argc, char* argv[], const zeroeq::URI& uri )
         : pubURI( uri )
     {
         for( int i = 0; i < argc; ++i  )
@@ -67,10 +67,10 @@ public:
                     httpPort = http.substr( colon + 1 );
                 }
             }
-            else if( _isParameter( i, "--zeq-publisher", argc, argv ))
-                pubURI = zeq::URI( argv[ i + 1 ] );
-            else if( _isParameter( i, "--zeq-subscriber", argc, argv ))
-                subURI = zeq::URI( argv[ i + 1 ] );
+            else if( _isParameter( i, "--zeroeq-publisher", argc, argv ))
+                pubURI = zeroeq::URI( argv[ i + 1 ] );
+            else if( _isParameter( i, "--zeroeq-subscriber", argc, argv ))
+                subURI = zeroeq::URI( argv[ i + 1 ] );
         }
         if( httpPort.empty( ))
             httpPort = DEFAULT_PORT;
@@ -106,8 +106,8 @@ public:
 
     std::string httpHost;
     std::string httpPort;
-    zeq::URI pubURI;
-    zeq::URI subURI;
+    zeroeq::URI pubURI;
+    zeroeq::URI subURI;
     std::unique_ptr< boost::thread > thread;
 
 private:
@@ -129,7 +129,7 @@ static bool _hasRestParameter( const int argc, char* argv[] )
 }
 
 std::unique_ptr< RestBridge > RestBridge::parse(
-    const zeq::Publisher& publisher, int argc, char* argv[] )
+    const zeroeq::Publisher& publisher, int argc, char* argv[] )
 {
     if( _hasRestParameter( argc, argv ))
         return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
@@ -141,14 +141,14 @@ std::unique_ptr< RestBridge > RestBridge::parse( const int argc, char* argv[] )
 {
     if( _hasRestParameter( argc, argv ))
         return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
-                                                              zeq::URI( )));
+                                                              zeroeq::URI( )));
     return nullptr;
 }
 
 std::unique_ptr< RestBridge > RestBridge::create( const int argc, char* argv[] )
 {
     return std::unique_ptr< RestBridge >( new RestBridge( argc, argv,
-                                                          zeq::URI( )));
+                                                          zeroeq::URI( )));
 }
 
 std::string RestBridge::getHelp()
@@ -157,11 +157,11 @@ std::string RestBridge::getHelp()
         " --rest [host][:port]: Enable the REST bridge. Optional parameters\n"
         "        configure the web server, running by default on :" +
           DEFAULT_PORT + "\n" +
-        " --zeq-publisher: URI where the application publishes ZeroEQ events\n"+
-        " --zeq-subscriber: URI to where the application subscribes to\n" );
+        " --zeroeq-publisher: URI where the application publishes ZeroEQ events\n"+
+        " --zeroeq-subscriber: URI to where the application subscribes to\n" );
 }
 
-RestBridge::RestBridge( const int argc, char* argv[], const zeq::URI& uri )
+RestBridge::RestBridge( const int argc, char* argv[], const zeroeq::URI& uri )
     : _impl( new detail::RestBridge( argc, argv, uri ))
 {
 }
@@ -171,12 +171,12 @@ RestBridge::~RestBridge()
     delete _impl;
 }
 
-zeq::URI RestBridge::getPublisherURI() const
+zeroeq::URI RestBridge::getPublisherURI() const
 {
     return _impl->pubURI;
 }
 
-zeq::URI RestBridge::getSubscriberURI() const
+zeroeq::URI RestBridge::getSubscriberURI() const
 {
     return _impl->subURI;
 }

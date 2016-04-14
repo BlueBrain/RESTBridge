@@ -20,7 +20,7 @@
 #ifndef RESTBRIDGE_RESTZEQTRANSLATOR_H
 #define RESTBRIDGE_RESTZEQTRANSLATOR_H
 
-#include <zeq/event.h>
+#include <zeroeq/event.h>
 
 #include <map>
 
@@ -33,7 +33,7 @@ static const std::string INTERNAL_CMD_VOCABULARY = "vocabulary";
 
 /**
  * The RestZeqTranslator class is responsible translating REST commands
- * into zeq events. The translation is based on registered vocabularies.
+ * into ZeroEQ events. The translation is based on registered vocabularies.
  */
 class RestZeqTranslator
 {
@@ -63,25 +63,25 @@ public:
     ~RestZeqTranslator();
 
     /**
-     * Translate REST command into a zeq event. If the command is not supported
+     * Translate REST command into a ZeroEQ event. If the command is not supported
      * throw an exeption.
      * @param request String containing the HTTP request
      * @throw InvalidRequest if HTTP request is not REST-compliant
      * @throw CommandNotFound if REST command is not supported
-     * @return the generated zeq event
+     * @return the generated ZeroEQ event
      */
-    zeq::Event translate( const std::string& request ) const;
+    zeroeq::Event translate( const std::string& request ) const;
 
     /**
-     * Translate REST command into a zeq event. If the command is not supported
+     * Translate REST command into a ZeroEQ event. If the command is not supported
      * throw an exeption.
      * @param request String containing the HTTP request
      * @param body The payload of the REST command
      * @throw InvalidRequest if HTTP request is not REST-compliant
      * @throw CommandNotFound if REST command is not supported
-     * @return the generated zeq event
+     * @return the generated ZeroEQ event
      */
-    zeq::Event translate( const std::string& request, const std::string& body )
+    zeroeq::Event translate( const std::string& request, const std::string& body )
         const;
 
     /**
@@ -89,14 +89,14 @@ public:
      * @param eventDescriptor The descriptor of the event (restName, eventType,
      *                        eventSchema )
      */
-    void addPublishedEvent( const zeq::EventDescriptor& eventDescriptor );
+    void addPublishedEvent( const zeroeq::EventDescriptor& eventDescriptor );
 
     /**
      * Add an event of type SUBSCRIBER into RestZeqTranslator known events map.
      * @param eventDescriptor The descriptor of the event (restName, eventType,
      *                        eventSchema )
      */
-    void addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor );
+    void addSubscribedEvent( const zeroeq::EventDescriptor& eventDescriptor );
 
     /**
      * Retrieve the REST command from the http request.
@@ -115,12 +115,12 @@ private:
     struct ZeqEventDescriptor
     {
         ZeqEventDescriptor() {}
-        ZeqEventDescriptor( zeq::uint128_t eventType, std::string eventSchema  )
+        ZeqEventDescriptor( zeroeq::uint128_t eventType, std::string eventSchema  )
             : eventType_( eventType )
             , eventSchema_( eventSchema )
         {}
 
-        zeq::uint128_t eventType_;
+        zeroeq::uint128_t eventType_;
         std::string eventSchema_;
     };
 

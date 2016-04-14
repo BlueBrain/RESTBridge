@@ -21,7 +21,7 @@
 #ifndef RESTRESTBRIDGE_TYPES_H
 #define RESTRESTBRIDGE_TYPES_H
 
-#include <zeq/types.h>
+#include <zeroeq/types.h>
 
 namespace restbridge
 {

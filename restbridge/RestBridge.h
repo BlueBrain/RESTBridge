@@ -45,8 +45,8 @@ public:
      * parameters:
      * * --rest [host][:port]: Enable the REST bridge. Optional parameters
      *   configure the web server, running by default on :4020
-     * * --zeq-publisher: URI where the application publishes ZeroEQ events
-     * * --zeq-subscriber: URI to where the application subscribes to
+     * * --zeroeq-publisher: URI where the application publishes ZeroEQ events
+     * * --zeroeq-subscriber: URI to where the application subscribes to
      *
      * @param publisher Existing publisher of the application
      * @param argc Argument count
@@ -54,7 +54,7 @@ public:
      * @return a configured and running REST bridge, or an invalid pointer.
      * @throw std::runtime_error if the HTTP server could not be started.
      */
-    static std::unique_ptr< RestBridge > parse( const zeq::Publisher& publisher,
+    static std::unique_ptr< RestBridge > parse( const zeroeq::Publisher& publisher,
                                                 int argc, char* argv[] );
 
     /** @sa parse() above. */
@@ -69,10 +69,10 @@ public:
     static std::string getHelp();
 
     /** @return the URI to which the application should publish. */
-    zeq::URI getPublisherURI() const;
+    zeroeq::URI getPublisherURI() const;
 
     /** @return the URI to which the application should subscribe. */
-    zeq::URI getSubscriberURI() const;
+    zeroeq::URI getSubscriberURI() const;
 
     /** @return true if the rest bridge is running. */
     bool isRunning() const;
@@ -82,7 +82,7 @@ private:
     RestBridge& operator=( const RestBridge& ) = delete;
     detail::RestBridge* const _impl;
 
-    RestBridge( int argc, char* argv[], const zeq::URI& );
+    RestBridge( int argc, char* argv[], const zeroeq::URI& );
 };
 
 }

@@ -22,15 +22,15 @@
 #include <boost/test/unit_test.hpp>
 #include <restbridge/detail/RestZeqTranslator.h>
 
-#include <zeq/zeq.h>
-#include <zeq/hbp/hbp.h>
+#include <zeroeq/zeroeq.h>
+#include <zeroeq/hbp/hbp.h>
 
 BOOST_AUTO_TEST_CASE( test_EventSUBSCRIBED )
 {
     restbridge::detail::RestZeqTranslator restZeqTranslator;
 
-    zeq::EventDescriptor eventDescpritor( zeq::hbp::CAMERA, zeq::hbp::EVENT_CAMERA,
-                                          zeq::hbp::SCHEMA_CAMERA, zeq::BIDIRECTIONAL );
+    zeroeq::EventDescriptor eventDescpritor( zeroeq::hbp::CAMERA, zeroeq::hbp::EVENT_CAMERA,
+                                          zeroeq::hbp::SCHEMA_CAMERA, zeroeq::BIDIRECTIONAL );
 
     restZeqTranslator.addSubscribedEvent( eventDescpritor );
 
@@ -39,9 +39,9 @@ BOOST_AUTO_TEST_CASE( test_EventSUBSCRIBED )
     const std::string& bodyJSON = { "{\"matrix\": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]}" } ;
     const std::string commandString = "CAMERA";
 
-    const zeq::Event& zeqEvent = restZeqTranslator.translate( commandString, bodyJSON );
+    const zeroeq::Event& zeroeqEvent = restZeqTranslator.translate( commandString, bodyJSON );
 
-    const std::vector< float >& deserialized = zeq::hbp::deserializeCamera( zeqEvent );
+    const std::vector< float >& deserialized = zeroeq::hbp::deserializeCamera( zeroeqEvent );
 
     BOOST_CHECK_EQUAL_COLLECTIONS( matrixData.begin(), matrixData.end(),
                                    deserialized.begin(), deserialized.end( ) );
@@ -51,25 +51,25 @@ BOOST_AUTO_TEST_CASE( test_EventPUBLISHED )
 {
     restbridge::detail::RestZeqTranslator restZeqTranslator;
 
-    zeq::EventDescriptor eventDescpritor( zeq::hbp::IMAGEJPEG, zeq::hbp::EVENT_IMAGEJPEG,
-                                          zeq::hbp::SCHEMA_IMAGEJPEG, zeq::PUBLISHER );
+    zeroeq::EventDescriptor eventDescpritor( zeroeq::hbp::IMAGEJPEG, zeroeq::hbp::EVENT_IMAGEJPEG,
+                                          zeroeq::hbp::SCHEMA_IMAGEJPEG, zeroeq::PUBLISHER );
 
     restZeqTranslator.addPublishedEvent( eventDescpritor );
 
     const std::string commandString = "IMAGEJPEG";
 
-    const zeq::Event& zeqEvent = restZeqTranslator.translate( commandString );
+    const zeroeq::Event& zeroeqEvent = restZeqTranslator.translate( commandString );
 
-    BOOST_CHECK_EQUAL( zeq::hbp::EVENT_IMAGEJPEG,
-                       zeq::vocabulary::deserializeRequest( zeqEvent ) );
+    BOOST_CHECK_EQUAL( zeroeq::hbp::EVENT_IMAGEJPEG,
+                       zeroeq::vocabulary::deserializeRequest( zeroeqEvent ) );
 }
 
 BOOST_AUTO_TEST_CASE( test_unknownEvent )
 {
     restbridge::detail::RestZeqTranslator restZeqTranslator;
 
-    zeq::EventDescriptor eventDescpritor( zeq::hbp::CAMERA, zeq::hbp::EVENT_CAMERA,
-                                          zeq::hbp::SCHEMA_CAMERA, zeq::BIDIRECTIONAL );
+    zeroeq::EventDescriptor eventDescpritor( zeroeq::hbp::CAMERA, zeroeq::hbp::EVENT_CAMERA,
+                                          zeroeq::hbp::SCHEMA_CAMERA, zeroeq::BIDIRECTIONAL );
 
     restZeqTranslator.addSubscribedEvent( eventDescpritor );
 
