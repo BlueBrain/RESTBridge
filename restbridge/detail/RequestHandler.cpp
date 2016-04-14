@@ -20,9 +20,9 @@
 
 #include "RequestHandler.h"
 #include "restbridge/log.h"
-#include <zeq/zeq.h>
+#include <zeroeq/zeroeq.h>
 
-#include <zeq/hbp/vocabulary.h>
+#include <zeroeq/hbp/vocabulary.h>
 
 namespace restbridge
 {
@@ -37,17 +37,17 @@ static const std::string REST_VERB_POST = "POST";
 
 namespace detail
 {
-RequestHandler::RequestHandler( zeq::URI& publisherURI,
-                                const zeq::URI& subscriberURI )
-    : _subscriber( subscriberURI, zeq::DEFAULT_SESSION )
-    , _publisher( publisherURI, zeq::DEFAULT_SESSION )
+RequestHandler::RequestHandler( zeroeq::URI& publisherURI,
+                                const zeroeq::URI& subscriberURI )
+    : _subscriber( subscriberURI, zeroeq::DEFAULT_SESSION )
+    , _publisher( publisherURI, zeroeq::DEFAULT_SESSION )
     , _listening( true )
     , _thread( boost::bind( &RequestHandler::listen_, this ))
 {
     publisherURI = _publisher.getURI();
-    _subscriber.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
+    _subscriber.registerHandler( zeroeq::vocabulary::EVENT_HEARTBEAT,
                                   boost::bind( &RequestHandler::onStartupHeartbeatEvent_, this ));
-    _subscriber.registerHandler( zeq::vocabulary::EVENT_VOCABULARY,
+    _subscriber.registerHandler( zeroeq::vocabulary::EVENT_VOCABULARY,
                                   boost::bind( &RequestHandler::onVocabularyEvent_, this, _1 ));
     _requestLock.lock();
 }
@@ -82,14 +82,14 @@ void RequestHandler::operator() ( const Server::request& request,
         }
         if( method == REST_VERB_PUT || method == REST_VERB_POST )
         {
-            const zeq::Event& event =
+            const zeroeq::Event& event =
                 _translator.translate( request.destination, request.body );
             response = processPUT_( event );
             return;
         }
         if( method == REST_VERB_GET )
         {
-            const zeq::Event& event =
+            const zeroeq::Event& event =
                 _translator.translate( request.destination );
             response = processGET_( event );
             return;
@@ -106,15 +106,15 @@ void RequestHandler::operator() ( const Server::request& request,
     }
 }
 
-Server::response RequestHandler::processPUT_( const zeq::Event& event )
+Server::response RequestHandler::processPUT_( const zeroeq::Event& event )
 {
     _publisher.publish( event );
     return Server::response::stock_reply( Server::response::ok, std::string( ));
 }
 
-Server::response RequestHandler::processGET_( const zeq::Event& event )
+Server::response RequestHandler::processGET_( const zeroeq::Event& event )
 {
-    const auto& type = ::zeq::vocabulary::deserializeRequest( event );
+    const auto& type = ::zeroeq::vocabulary::deserializeRequest( event );
     Server::response response;
     _subscriber.registerHandler( type,
                                  boost::bind( &RequestHandler::onEvent_, this,
@@ -130,55 +130,55 @@ Server::response RequestHandler::processGET_( const zeq::Event& event )
     return response;
 }
 
-void RequestHandler::onEvent_( const zeq::Event& event,
-                               const zeq::uint128_t& expected,
+void RequestHandler::onEvent_( const zeroeq::Event& event,
+                               const zeroeq::uint128_t& expected,
                                Server::response& response )
 {
     if( event.getType() != expected )
         return;
 
     response = Server::response::stock_reply( Server::response::ok,
-                                     zeq::vocabulary::deserializeJSON( event ));
+                                     zeroeq::vocabulary::deserializeJSON( event ));
     _requestLock.unlock();
 }
 
 void RequestHandler::onStartupHeartbeatEvent_()
 {
-    const zeq::Event& zeqEvent =
-            zeq::vocabulary::serializeRequest( zeq::vocabulary::EVENT_VOCABULARY );
-    _publisher.publish( zeqEvent );
+    const zeroeq::Event& zeroeqEvent =
+            zeroeq::vocabulary::serializeRequest( zeroeq::vocabulary::EVENT_VOCABULARY );
+    _publisher.publish( zeroeqEvent );
 }
 
 void RequestHandler::onHeartbeatEvent_()
 {
 }
 
-void RequestHandler::onVocabularyEvent_( const zeq::Event& event )
+void RequestHandler::onVocabularyEvent_( const zeroeq::Event& event )
 {
-    _subscriber.deregisterHandler( zeq::vocabulary::EVENT_VOCABULARY );
-    _subscriber.deregisterHandler( zeq::vocabulary::EVENT_HEARTBEAT );
-    _subscriber.registerHandler( zeq::vocabulary::EVENT_HEARTBEAT,
+    _subscriber.deregisterHandler( zeroeq::vocabulary::EVENT_VOCABULARY );
+    _subscriber.deregisterHandler( zeroeq::vocabulary::EVENT_HEARTBEAT );
+    _subscriber.registerHandler( zeroeq::vocabulary::EVENT_HEARTBEAT,
                                   boost::bind( &RequestHandler::onHeartbeatEvent_, this ) );
-    const zeq::EventDescriptors& eventDescriptors =
-        zeq::vocabulary::deserializeVocabulary( event );
+    const zeroeq::EventDescriptors& eventDescriptors =
+        zeroeq::vocabulary::deserializeVocabulary( event );
 
-    for( const zeq::EventDescriptor& eventDescriptor : eventDescriptors )
+    for( const zeroeq::EventDescriptor& eventDescriptor : eventDescriptors )
         addEventDescriptor_( eventDescriptor );
 }
 
 void RequestHandler::addEventDescriptor_(
-    const zeq::EventDescriptor& descriptor )
+    const zeroeq::EventDescriptor& descriptor )
 {
-    zeq::vocabulary::registerEvent( descriptor.getEventType(),
+    zeroeq::vocabulary::registerEvent( descriptor.getEventType(),
                                     descriptor.getSchema( ));
 
-    if( ( descriptor.getEventDirection() == zeq::PUBLISHER ) ||
-        ( descriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
+    if( ( descriptor.getEventDirection() == zeroeq::PUBLISHER ) ||
+        ( descriptor.getEventDirection() == zeroeq::BIDIRECTIONAL ) )
     {
         _translator.addPublishedEvent( descriptor );
     }
-    if( ( descriptor.getEventDirection() == zeq::SUBSCRIBER ) ||
-        ( descriptor.getEventDirection() == zeq::BIDIRECTIONAL ) )
+    if( ( descriptor.getEventDirection() == zeroeq::SUBSCRIBER ) ||
+        ( descriptor.getEventDirection() == zeroeq::BIDIRECTIONAL ) )
     {
         _translator.addSubscribedEvent( descriptor );
     }

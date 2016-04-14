@@ -16,8 +16,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-source_group(\\ FILES CMakeLists.txt)
-
 set(RESTBRIDGE_PUBLIC_HEADERS
   RestBridge.h
   types.h)
@@ -29,7 +27,7 @@ set(RESTBRIDGE_SOURCES
   detail/RequestHandler.cpp
   detail/RestZeqTranslator.cpp)
 
-set(RESTBRIDGE_LINK_LIBRARIES PUBLIC zeq
+set(RESTBRIDGE_LINK_LIBRARIES PUBLIC ZeroEQ
   PRIVATE cppnetlib-client-connections ${Boost_LIBRARIES} pthread)
 set(RESTBRIDGE_OMIT_LIBRARY_HEADER ON)
 

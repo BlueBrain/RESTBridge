@@ -20,8 +20,8 @@
 #include "RestZeqTranslator.h"
 #include "restbridge/log.h"
 
-#include <zeq/zeq.h>
-#include <zeq/hbp/vocabulary.h>
+#include <zeroeq/zeroeq.h>
+#include <zeroeq/hbp/vocabulary.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -47,7 +47,7 @@ RestZeqTranslator::~RestZeqTranslator()
 {
 }
 
-zeq::Event RestZeqTranslator::translate( const std::string& request,
+zeroeq::Event RestZeqTranslator::translate( const std::string& request,
                                          const std::string& body ) const
 {
     const std::string& command = getCommand( request );
@@ -56,10 +56,10 @@ zeq::Event RestZeqTranslator::translate( const std::string& request,
     if( it == vocabularySubscribed_.end() )
         RBTHROW( CommandNotFound( command ));
 
-    return zeq::vocabulary::serializeJSON( it->second.eventType_, body );
+    return zeroeq::vocabulary::serializeJSON( it->second.eventType_, body );
 }
 
-zeq::Event RestZeqTranslator::translate( const std::string& request ) const
+zeroeq::Event RestZeqTranslator::translate( const std::string& request ) const
 {
     const std::string& command = getCommand( request );
 
@@ -67,7 +67,7 @@ zeq::Event RestZeqTranslator::translate( const std::string& request ) const
     if( it == vocabularyPublished_.end() )
         RBTHROW(CommandNotFound( command ) );
 
-    return zeq::vocabulary::serializeRequest( it->second.eventType_ );
+    return zeroeq::vocabulary::serializeRequest( it->second.eventType_ );
 }
 
 std::string RestZeqTranslator::getCommand( const std::string& request ) const
@@ -91,7 +91,7 @@ std::string RestZeqTranslator::getCommand( const std::string& request ) const
     return commandAndPayload.front();
 }
 
-void RestZeqTranslator::addPublishedEvent( const zeq::EventDescriptor& eventDescriptor )
+void RestZeqTranslator::addPublishedEvent( const zeroeq::EventDescriptor& eventDescriptor )
 {
     //We insure that restName is lowercase because urls are not case sensitive
     std::string lowercaseRestName = eventDescriptor.getRestName();
@@ -102,7 +102,7 @@ void RestZeqTranslator::addPublishedEvent( const zeq::EventDescriptor& eventDesc
                             eventDescriptor.getSchema( ));
 }
 
-void RestZeqTranslator::addSubscribedEvent( const zeq::EventDescriptor& eventDescriptor )
+void RestZeqTranslator::addSubscribedEvent( const zeroeq::EventDescriptor& eventDescriptor )
 {
     //We insure that restName is lowercase because urls are not case sensitive
     std::string lowercaseRestName = eventDescriptor.getRestName();

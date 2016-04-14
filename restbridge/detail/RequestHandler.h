@@ -23,12 +23,12 @@
 
 #include <restbridge/types.h>
 #include <restbridge/detail/RestZeqTranslator.h>
-#include <zeq/publisher.h>
-#include <zeq/subscriber.h>
+#include <zeroeq/publisher.h>
+#include <zeroeq/subscriber.h>
 #include <boost/network/protocol/http/server.hpp>
 #include <mutex>
 #ifdef ECHO
-#  undef ECHO // Global namespace pollution conflicts with the ECHO ZEq event
+#  undef ECHO // Global namespace pollution conflicts with the ECHO ZeroEQ event
 #endif
 
 namespace restbridge
@@ -41,7 +41,7 @@ typedef boost::network::http::server< RequestHandler > Server;
 
 /**
  * The RequestHandler class handles incoming HTTP requests and
- * transforms them into corresponding zeq events based on registered
+ * transforms them into corresponding ZeroEQ events based on registered
  * vocabularies.
  */
 class RequestHandler
@@ -49,10 +49,10 @@ class RequestHandler
 public:
     /**
      * Constructor
-     * @param publisherSchema Schema on which zeq events will be published
-     * @param subscriberSchema Schema on which zeq events will be received
+     * @param publisherSchema Schema on which ZeroEQ events will be published
+     * @param subscriberSchema Schema on which ZeroEQ events will be received
      */
-    RequestHandler( zeq::URI& publisherURI, const zeq::URI& subscriberURI );
+    RequestHandler( zeroeq::URI& publisherURI, const zeroeq::URI& subscriberURI );
     ~RequestHandler();
 
     /**
@@ -74,17 +74,17 @@ public:
 private:
     void onStartupHeartbeatEvent_();
     void onHeartbeatEvent_();
-    void onVocabularyEvent_( const zeq::Event& event );
-    void onEvent_( const zeq::Event& event, const zeq::uint128_t& expected,
+    void onVocabularyEvent_( const zeroeq::Event& event );
+    void onEvent_( const zeroeq::Event& event, const zeroeq::uint128_t& expected,
                    Server::response& response );
-    void addEventDescriptor_( const zeq::EventDescriptor& eventDescriptor );
+    void addEventDescriptor_( const zeroeq::EventDescriptor& eventDescriptor );
 
-    Server::response processPUT_( const zeq::Event& event );
-    Server::response processGET_( const zeq::Event& event );
+    Server::response processPUT_( const zeroeq::Event& event );
+    Server::response processGET_( const zeroeq::Event& event );
     void listen_();
 
-    zeq::Subscriber _subscriber;
-    zeq::Publisher _publisher;
+    zeroeq::Subscriber _subscriber;
+    zeroeq::Publisher _publisher;
 
     std::mutex _requestLock;
 
