@@ -18,8 +18,7 @@
 # All rights reserved. Do not distribute without further notice.
 
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-
-project(RESTBridge VERSION 0.2.0)
+project(RESTBridge VERSION 0.3.0)
 set(RESTBridge_VERSION_ABI 1)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
