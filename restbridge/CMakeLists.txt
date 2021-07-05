@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, Human Brain Project
+# Copyright (c) 2013-2021, EPFL/Blue Brain Project
 #                          Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 #
 # This file is part of RESTBridge <https://github.com/BlueBrain/RESTBridge>

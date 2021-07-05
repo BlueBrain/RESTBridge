@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, Human Brain Project
+# Copyright (c) 2013-2021, EPFL/Blue Brain Project
 #                          Stefan Eilemann <Stefan.Eilemann@epfl.ch>
 #
 # This file is part of RESTBridge <https://github.com/BlueBrain/RESTBridge>
